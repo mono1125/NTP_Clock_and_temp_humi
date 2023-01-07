@@ -157,12 +157,14 @@ void displayTime(const tm *timeInfo, const float *humi, const float *temp) {
   for (int i = 0; i < numOfADigPins; i++) {  // 右の桁からディジットを選択する
     digitalWrite(a_digPins[i], DIGIT_ON);        // ディジットをオンにする
     displayNumber(d % 10);                       // 10で割った余りを求めて、1の位を求め、表示する
-    delay(1);
+    delayMicroseconds(100);
+    // delay(1);
     clearSegments();                        // セグメントをすべてオフにする
 
     if ((i == 2) || (i == 4)){
       digitalWrite(OSL_DP, SEGMENT_ON);
-      delay(1);
+      delayMicroseconds(100);
+      // delay(1);
       digitalWrite(OSL_DP, SEGMENT_OFF);
     }
     digitalWrite(a_digPins[i], DIGIT_OFF);  // ディジットをオフにする
@@ -171,12 +173,14 @@ void displayTime(const tm *timeInfo, const float *humi, const float *temp) {
   for (int i = 0; i < numOfBDigPins; i++) {  // 右の桁からディジットを選択する
     digitalWrite(b_digPins[i], DIGIT_ON);        // ディジットをオンにする
     displayNumber(n % 10);                       // 10で割った余りを求めて、1の位を求め、表示する
-    delay(1);
+    delayMicroseconds(100);
+    // delay(1);
     clearSegments();                        // セグメントをすべてオフにする
 
     if ((i == 2) || (i == 4)){
       digitalWrite(OSL_DP, SEGMENT_ON);
-      delay(1);
+      delayMicroseconds(100);
+      // delay(1);
       digitalWrite(OSL_DP, SEGMENT_OFF);
     }
     digitalWrite(b_digPins[i], DIGIT_OFF);  // ディジットをオフにする
@@ -185,12 +189,14 @@ void displayTime(const tm *timeInfo, const float *humi, const float *temp) {
   for (int i = 0; i < numOfCDigPins; i++) {  // 右の桁からディジットを選択する
     digitalWrite(c_digPins[i], DIGIT_ON);        // ディジットをオンにする
     displayNumber(ht % 10);                       // 10で割った余りを求めて、1の位を求め、表示する
-    delay(1);
+    delayMicroseconds(100);
+    // delay(1);
     clearSegments();                        // セグメントをすべてオフにする
 
     if ((i == 1) || (i == 4)){
       digitalWrite(OSL_DP, SEGMENT_ON);
-      delay(1);
+      delayMicroseconds(100);
+      // delay(1);
       digitalWrite(OSL_DP, SEGMENT_OFF);
     }
     digitalWrite(c_digPins[i], DIGIT_OFF);  // ディジットをオフにする

@@ -46,7 +46,7 @@ void setup() {
 
   myI2Cbegin();
 
-  xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
 }
 
@@ -76,7 +76,7 @@ void Task0a(void *pvParams) {
 void Task1a(void *pvParams) {
   timer2 = timerBegin(1, getApbFrequency()/1000000, true); // 1us
   timerAttachInterrupt(timer2, &onTimer2, true);
-  timerAlarmWrite(timer2, 10000, true);
+  timerAlarmWrite(timer2, 800, true);
   timerAlarmEnable(timer2);
   while (true) {
     if (timeCounter2 > 0) {
@@ -87,7 +87,7 @@ void Task1a(void *pvParams) {
       getLocalTime(&timeInfo);
       displayTime(&timeInfo, &humi, &temp);
     }
-    delay(2);
+    delay(1);
   }
   vTaskDelete(NULL);
 }
