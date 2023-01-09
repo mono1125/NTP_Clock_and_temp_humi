@@ -5,6 +5,7 @@
 #include "MyI2C.h"
 #include "MyLed.h"
 #include "MyNTP.h"
+#include "MyMqtt.h"
 
 /* Interrupt */
 volatile int timeCounter1;
@@ -41,6 +42,7 @@ struct tm timeInfo;
 void setup() {
   if (myWiFibegin() == 0) {
     beginNtp(60000);
+    initMqtt();
   }
 
   initLedDisplay();
@@ -48,6 +50,7 @@ void setup() {
   myI2Cbegin();
 
   xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
 }

@@ -18,5 +18,8 @@
 #define MQTT_PORT 8883
 #endif
 
+extern void initMqtt();
+extern void mqttTask(void *pvParameters);
+
 
 #endif
