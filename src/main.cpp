@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include "esp_log.h"
+#include "esp_sntp.h"
 #include "MyWiFi.h"
 #include "MyI2C.h"
 #include "MyLed.h"
+#include "MyNTP.h"
 
 /* Interrupt */
 volatile int timeCounter1;
@@ -38,8 +40,7 @@ struct tm timeInfo;
 
 void setup() {
   if (watchWiFiStatus() == 0) {
-    Serial.println("ntp config");
-    configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");
+    beginNtp(60000);
   }
 
   initLedDisplay();
@@ -51,7 +52,8 @@ void setup() {
 }
 
 void loop() {
-  delay(1);
+  ESP_LOGI("loop", "free heap size: %d", esp_get_free_heap_size());
+  delay(10000);
 }
 
 void Task0a(void *pvParams) {
