@@ -39,7 +39,7 @@ static float temp = 0;
 struct tm timeInfo;
 
 void setup() {
-  if (watchWiFiStatus() == 0) {
+  if (myWiFibegin() == 0) {
     beginNtp(60000);
   }
 
@@ -47,6 +47,7 @@ void setup() {
 
   myI2Cbegin();
 
+  xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
 }

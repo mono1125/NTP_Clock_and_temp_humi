@@ -14,7 +14,10 @@
 #define WIFI_PASS "Your Wi-Fi PASSWORD"
 #endif
 
+extern int myWiFibegin();
 // Wi-Fi接続状態監視
 extern int watchWiFiStatus();
+
+extern void WiFiKeepAliveTask(void *pvParameters);
 
 #endif
