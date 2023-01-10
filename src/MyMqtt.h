@@ -20,6 +20,6 @@
 
 extern void initMqtt();
 extern void mqttTask(void *pvParameters);
-
+extern void mqttRevMsgHandleTask(void *pvParameters);
 
 #endif

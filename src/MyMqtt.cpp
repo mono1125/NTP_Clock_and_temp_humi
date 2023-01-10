@@ -7,6 +7,8 @@ const char MQTT_PUB_TOPIC[] = "test/" THING_NAME "/1";
 
 WiFiClientSecure httpsClient;
 PubSubClient mqttClient(httpsClient);
+QueueHandle_t subMsgQueue;
+QueueHandle_t pubMsgQueue;
 
 /*
 参考
@@ -22,6 +24,7 @@ static void mqttCallback(char* topic, byte* payload, unsigned int length){
       rev[i] = (char)payload[i];
     }
     ESP_LOGI(TAG, "%s", rev); // 一時バッファに格納すると扱える
+    xQueueSend(subMsgQueue, rev, 0);
   } else {
     ESP_LOGE(TAG, "Message length: %d is larger 500", length);
   }
@@ -87,12 +90,32 @@ void initMqtt(){
   mqttClient.setServer(MQTT_ENDPOINT, MQTT_PORT);
   mqttClient.setCallback(mqttCallback);
   connectMqtt();
+  subMsgQueue = xQueueCreate(1, sizeof(char) * 500);
+  pubMsgQueue = xQueueCreate(1, sizeof(char) * 500);
 }
 
 void mqttTask(void *pvParameters){
+  char buf[500];
   while(1){
     mqttClient.loop();
+    if (xQueueReceive(pubMsgQueue, &buf, 0) == pdPASS){
+      mqttClient.publish(MQTT_PUB_TOPIC, buf);
+      ESP_LOGI(TAG, "publish %s", buf); // 一時バッファに格納すると扱える
+    }
     delay(3000);
+  }
+  vTaskDelete(NULL);
+}
+
+void mqttRevMsgHandleTask(void *pvParameters){
+  char buf[500];
+  char msg[500] = "{\"message\":\"受け取りました\"}";
+  while(1){
+    if (xQueueReceive(subMsgQueue, &buf, 0) == pdPASS){
+      ESP_LOGI(TAG, "%s", buf); // 一時バッファに格納すると扱える
+      xQueueSend(pubMsgQueue, msg, 0);
+    }
+    delay(100);
   }
   vTaskDelete(NULL);
 }

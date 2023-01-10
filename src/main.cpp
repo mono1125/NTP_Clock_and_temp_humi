@@ -53,6 +53,7 @@ void setup() {
   xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
 }
 
 void loop() {
