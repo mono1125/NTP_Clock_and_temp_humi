@@ -6,6 +6,7 @@
 #include "MyLed.h"
 #include "MyNTP.h"
 #include "MyMqtt.h"
+#include "MyWebSrv.h"
 
 /* Interrupt */
 volatile int timeCounter1;
@@ -43,6 +44,7 @@ void setup() {
   if (myWiFibegin() == 0) {
     beginNtp(60000);
     initMqtt();
+    myWebSrv();
   }
 
   initLedDisplay();
