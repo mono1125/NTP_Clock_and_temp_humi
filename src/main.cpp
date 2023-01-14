@@ -7,6 +7,7 @@
 #include "MyNTP.h"
 #include "MyMqtt.h"
 #include "MyWebSrv.h"
+#include "MyFileManage.h"
 
 /* Interrupt */
 volatile int timeCounter1;
@@ -41,6 +42,8 @@ static float temp = 0;
 struct tm timeInfo;
 
 void setup() {
+  initMyFileManage();
+
   if (myWiFibegin() == 0) {
     beginNtp(60000);
     initMqtt();

@@ -1,0 +1,16 @@
+{
+    "deviceName": "ESP32",
+    "deviceId": "default",
+    "localIPAddress": "",
+    "subnetMask": "",
+    "gatewayAddress": "",
+    "useDhcp": "0",
+    "targetIPaddress": "",
+    "targetPort": "50000",
+    "wifiSsid": "",
+    "wifiPass": "",
+    "testPubTopic": "",
+    "prodPubTopic": "",
+    "devLogPubTopic": "",
+    "confSubTopic": ""
+}
