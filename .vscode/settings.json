@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "limits": "cpp",
+        "type_traits": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_style": "{BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 120, AlignAfterOpenBracket: Align, AlignConsecutiveAssignments: true, AlignConsecutiveDeclarations: true, AlignConsecutiveMacros: true, AlignOperands: true, AlignTrailingComments: true, AllowShortFunctionsOnASingleLine: None, IncludeBlocks: Preserve, IndentCaseLabels: true, PointerAlignment: Right, SpaceAfterCStyleCast: false, SpaceBeforeParens: ControlStatements, SpacesBeforeTrailingComments: 2}"
+}
