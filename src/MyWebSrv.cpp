@@ -14,17 +14,25 @@ void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t in
     return request->requestAuthentication();
   }
   if ((request->url() == "/api/config") && (request->method() == HTTP_POST)) {
-    /*
-      Sample Post Data: {"message": "post-data"}
-    */
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, (const char *)data);
-    if (doc.containsKey("message")) {
-      const char *buf = doc["message"];
-      ESP_LOGI(TAG, "Deserialized Json [message]: %s", buf);
+    ESP_LOGI(TAG, "Post Event /api/config");
+
+    DynamicJsonDocument doc(2048);
+    if (myDeserializeJson(doc, (char *)data) != 0) {
+      return request->send(500, "application/json", "{\"message\":\"Deserialization Error\"}");
+    }
+    if (doc.containsKey("deviceName")) {
+      const char *buf = doc["deviceName"];
+      ESP_LOGI(TAG, "doc[\"deviceName\"]: %s", buf);
+      if (strcmp(DEVICE_NAME, buf) != 0) {
+        ESP_LOGE(TAG, "Error: DEVICE_NAME != deviceName");
+        return request->send(400, "application/json", "{\"message\":\"Device name does not match\"}");
+      }
+      if (writeJsonFile("/config.json", doc) != 0) {
+        return request->send(500, "application/json", "{\"message\":\"Write JSON File Error\"}");
+      }
     }
 
-    request->send(200, "application/json", "{\"message\":\"post method response\"}");
+    return request->send(201, "application/json", "{\"message\":\"Write config.json Success!\"}");
   }
 }
 
@@ -62,11 +70,19 @@ void myWebSrv() {
   --- TODO ---*/
 
   server.on("/api/config", HTTP_GET, [](AsyncWebServerRequest *request) {
-    // TODO: 現在の設定値を返す
     if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
     }
-    request->send(200, "application/json", "{\"message\":\"sample parameter\"}");
+    if (LittleFS.exists("/config.json")) {
+      ESP_LOGD(TAG, "response: /config.json");
+      return request->send(LittleFS, "/config.json");
+    } else if (LittleFS.exists("/default_config.json")) {
+      ESP_LOGD(TAG, "response: /default_config.json");
+      return request->send(LittleFS, "/default_config.json");
+    } else {
+      ESP_LOGD(TAG, "response: Not exists Config Files");
+      return request->send(500, "application/json", "{\"message\":\"Not exists Config Files\"}");
+    }
   });
 
   // Catch-All Handler

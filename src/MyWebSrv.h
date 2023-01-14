@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
+#include "MyFileManage.h"
 #include "secrets.h"
 
 #ifndef HTTP_PORT

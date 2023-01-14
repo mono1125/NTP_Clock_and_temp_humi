@@ -15,9 +15,10 @@
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
+#define DEVICE_NAME "ESP32"
+
 /* 設定値用構造体 */
 typedef struct {
-  char     deviceName[32];
   uint8_t  deviceId;
   char     localIPAddress[15];
   char     subnetMask[15];
