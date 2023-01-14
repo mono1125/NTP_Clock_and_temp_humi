@@ -15,25 +15,6 @@
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
-#define DEVICE_NAME "ESP32"
-
-/* 設定値用構造体 */
-typedef struct {
-  uint8_t  deviceId;
-  char     localIPAddress[15];
-  char     subnetMask[15];
-  char     gatewayAddress[15];
-  uint8_t  useDhcp;
-  char     targetIPaddress[15];
-  uint16_t targetPort;
-  char     wifiSsid[32];
-  char     wifiPass[50];
-  char     testPubTopic[60];
-  char     prodPubTopic[60];
-  char     devLogPubTopic[60];
-  char     confSubTopic[60];
-} Config;
-
 /* LittleFSを開始する
   引数: なし
   責務: LittleFSを開始する

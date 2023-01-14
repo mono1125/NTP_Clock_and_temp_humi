@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "MyConfig.h"
 #include "MyFileManage.h"
 #include "MyI2C.h"
 #include "MyLed.h"
@@ -8,6 +9,8 @@
 #include "MyWiFi.h"
 #include "esp_log.h"
 #include "esp_sntp.h"
+
+static char TAG[] = "main";
 
 /* Interrupt */
 volatile int timeCounter1;
@@ -40,9 +43,14 @@ static float humi = 0;
 static float temp = 0;
 
 struct tm timeInfo;
+Config    config;
 
 void setup() {
+  initOpeModePin();
   initMyFileManage();
+  setConfig(&config);
+  printConfig(&config);
+  ESP_LOGI(TAG, "sendMode: %d", getSendMode(&config));
 
   if (myWiFibegin() == 0) {
     beginNtp(60000);
