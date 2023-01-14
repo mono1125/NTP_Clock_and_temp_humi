@@ -20,6 +20,7 @@
 #define OSL_G 17 // G, cathode
 #define OSL_DP 18 // DP, cathode
 
+/* Bread Board */
 #define A_OSL_DIG1 19 // DIG 1, anode
 #define A_OSL_DIG2 20 // DIG 2, anode
 #define A_OSL_DIG3 21 // DIG 3, anode
@@ -40,6 +41,30 @@
 #define C_OSL_DIG4 12 // DIG 4, anode
 #define C_OSL_DIG5 13 // DIG 4, anode
 #define C_OSL_DIG6 14 // DIG 4, anode
+/* Bread Board */
+
+/* PCB */
+// #define A_OSL_DIG1 43 // DIG 1, anode
+// #define A_OSL_DIG2 44 // DIG 2, anode
+// #define A_OSL_DIG3 1 // DIG 3, anode
+// #define A_OSL_DIG4 2  // DIG 4, anode
+// #define A_OSL_DIG5 42  // DIG 4, anode
+// #define A_OSL_DIG6 41 // DIG 4, anode
+
+// #define B_OSL_DIG1 40 // DIG 1, anode
+// #define B_OSL_DIG2 39 // DIG 2, anode
+// #define B_OSL_DIG3 38 // DIG 3, anode
+// #define B_OSL_DIG4 37 // DIG 4, anode
+// #define B_OSL_DIG5 36 // DIG 4, anode
+// #define B_OSL_DIG6 35 // DIG 4, anode
+
+// #define C_OSL_DIG1 0 // DIG 1, anode
+// #define C_OSL_DIG2 45 // DIG 2, anode
+// #define C_OSL_DIG3 48 // DIG 3, anode
+// #define C_OSL_DIG4 47 // DIG 4, anode
+// #define C_OSL_DIG5 21 // DIG 4, anode
+// #define C_OSL_DIG6 20 // DIG 4, anode
+/* PCB */
 
 /*
 -- 数字とそのときの状態をビット表現 --
