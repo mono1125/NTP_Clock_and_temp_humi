@@ -4,23 +4,23 @@ static char TAG[] = "MyWebSrv";
 
 static AsyncWebServer server(HTTP_PORT);
 
-void onRequest(AsyncWebServerRequest *request){
+void onRequest(AsyncWebServerRequest *request) {
   // Handle Unknown Request
   request->send(404);
 }
 
-void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-  if(!request->authenticate(HTTP_USER, HTTP_PASS)){
+void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+  if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
     return request->requestAuthentication();
   }
-  if ((request->url() == "/api/config") && (request->method() == HTTP_POST)){
+  if ((request->url() == "/api/config") && (request->method() == HTTP_POST)) {
     /*
       Sample Post Data: {"message": "post-data"}
     */
     DynamicJsonDocument doc(1024);
-    deserializeJson(doc, (const char*)data);
-    if(doc.containsKey("message")){
-      const char* buf = doc["message"];
+    deserializeJson(doc, (const char *)data);
+    if (doc.containsKey("message")) {
+      const char *buf = doc["message"];
       ESP_LOGI(TAG, "Deserialized Json [message]: %s", buf);
     }
 
@@ -29,15 +29,15 @@ void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t in
 }
 
 void myWebSrv() {
-  server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
-    if(!request->authenticate(HTTP_USER, HTTP_PASS)){
+  server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
     }
     request->send(200, "text/plain", String(esp_get_free_heap_size()));
   });
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    if(!request->authenticate(HTTP_USER, HTTP_PASS)){
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
     }
     request->send(200, "text/plain", "Hello!");
@@ -61,9 +61,9 @@ void myWebSrv() {
   });
   --- TODO ---*/
 
-  server.on("/api/config", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/api/config", HTTP_GET, [](AsyncWebServerRequest *request) {
     // TODO: 現在の設定値を返す
-    if(!request->authenticate(HTTP_USER, HTTP_PASS)){
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
     }
     request->send(200, "application/json", "{\"message\":\"sample parameter\"}");

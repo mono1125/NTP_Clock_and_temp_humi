@@ -4,6 +4,6 @@
 #include <Arduino.h>
 #include "esp_sntp.h"
 
-extern void beginNtp(uint32_t interval_ms = 60000); // 1min
+extern void beginNtp(uint32_t interval_ms = 60000);  // 1min
 
 #endif

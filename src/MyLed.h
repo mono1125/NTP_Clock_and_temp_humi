@@ -4,43 +4,43 @@
 #include "esp_log.h"
 
 // 桁数
-#define DIGIT_ON HIGH
+#define DIGIT_ON  HIGH
 #define DIGIT_OFF LOW
 // 数字
-#define SEGMENT_ON LOW
+#define SEGMENT_ON  LOW
 #define SEGMENT_OFF HIGH
 
 /* ---------- 7Segment LED PIN MAP ---------- */
-#define OSL_A 4  // A, cathode
-#define OSL_B 5  // B, cathode
-#define OSL_C 6  // C, cathode
-#define OSL_D 7 // D, cathode
-#define OSL_E 15 // E, cathode
-#define OSL_F 16 // F, cathode
-#define OSL_G 17 // G, cathode
-#define OSL_DP 18 // DP, cathode
+#define OSL_A  4   // A, cathode
+#define OSL_B  5   // B, cathode
+#define OSL_C  6   // C, cathode
+#define OSL_D  7   // D, cathode
+#define OSL_E  15  // E, cathode
+#define OSL_F  16  // F, cathode
+#define OSL_G  17  // G, cathode
+#define OSL_DP 18  // DP, cathode
 
 /* Bread Board */
-#define A_OSL_DIG1 19 // DIG 1, anode
-#define A_OSL_DIG2 20 // DIG 2, anode
-#define A_OSL_DIG3 21 // DIG 3, anode
+#define A_OSL_DIG1 19  // DIG 1, anode
+#define A_OSL_DIG2 20  // DIG 2, anode
+#define A_OSL_DIG3 21  // DIG 3, anode
 #define A_OSL_DIG4 47  // DIG 4, anode
 #define A_OSL_DIG5 48  // DIG 4, anode
-#define A_OSL_DIG6 45 // DIG 4, anode
+#define A_OSL_DIG6 45  // DIG 4, anode
 
-#define B_OSL_DIG1 38 // DIG 1, anode
-#define B_OSL_DIG2 39 // DIG 2, anode
-#define B_OSL_DIG3 40 // DIG 3, anode
-#define B_OSL_DIG4 41 // DIG 4, anode
-#define B_OSL_DIG5 42 // DIG 4, anode
-#define B_OSL_DIG6 2 // DIG 4, anode
+#define B_OSL_DIG1 38  // DIG 1, anode
+#define B_OSL_DIG2 39  // DIG 2, anode
+#define B_OSL_DIG3 40  // DIG 3, anode
+#define B_OSL_DIG4 41  // DIG 4, anode
+#define B_OSL_DIG5 42  // DIG 4, anode
+#define B_OSL_DIG6 2   // DIG 4, anode
 
-#define C_OSL_DIG1 9 // DIG 1, anode
-#define C_OSL_DIG2 10 // DIG 2, anode
-#define C_OSL_DIG3 11 // DIG 3, anode
-#define C_OSL_DIG4 12 // DIG 4, anode
-#define C_OSL_DIG5 13 // DIG 4, anode
-#define C_OSL_DIG6 14 // DIG 4, anode
+#define C_OSL_DIG1 9   // DIG 1, anode
+#define C_OSL_DIG2 10  // DIG 2, anode
+#define C_OSL_DIG3 11  // DIG 3, anode
+#define C_OSL_DIG4 12  // DIG 4, anode
+#define C_OSL_DIG5 13  // DIG 4, anode
+#define C_OSL_DIG6 14  // DIG 4, anode
 /* Bread Board */
 
 /* PCB */
@@ -97,11 +97,7 @@ OSL_G, digits[n] & 0b01000000, digts[n] & (1 << 6)
 digitalWrite(segmentsPins[i], digits[n] & (1 << i) ? HIGH : LOW);
 */
 
-typedef enum {
-  A,
-  B,
-  C
-} SevenSegmentID;
+typedef enum { A, B, C } SevenSegmentID;
 
 extern void initLedDisplay();
 extern void displayTime(const tm *timeInfo, const float *humi, const float *temp);

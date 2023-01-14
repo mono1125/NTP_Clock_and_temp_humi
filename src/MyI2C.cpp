@@ -53,12 +53,12 @@ int myI2CGetData(float *h, float *t) {
   Wire.requestFrom(I2C_DEVIVE_ADDRESS, 6);
 
   unsigned char str[6];
-  int index = 0;
+  int           index = 0;
   while (Wire.available()) {
     str[index++] = Wire.read();
   }
 
-  if(str[0] & 0x80) {
+  if (str[0] & 0x80) {
     return 0;
   }
 
@@ -71,15 +71,15 @@ int myI2CGetData(float *h, float *t) {
   __humi <<= 4;
   __humi += str[3] >> 4;
 
-  *h = (float)((__humi/1048576.0) * 100);
+  *h = (float)((__humi / 1048576.0) * 100);
 
-  __temp = str[3]&0x0f;
-  __temp <<=8;
+  __temp = str[3] & 0x0f;
+  __temp <<= 8;
   __temp += str[4];
-  __temp <<=8;
+  __temp <<= 8;
   __temp += str[5];
 
-  *t = (float)(((__temp/1048576.0) * 200.0) -50.0);
+  *t = (float)(((__temp / 1048576.0) * 200.0) - 50.0);
 
   return 1;
 }

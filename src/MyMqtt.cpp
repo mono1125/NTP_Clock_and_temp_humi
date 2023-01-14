@@ -6,24 +6,24 @@ const char MQTT_SUB_TOPIC[] = "dev/" THING_NAME "/1";
 const char MQTT_PUB_TOPIC[] = "test/" THING_NAME "/1";
 
 WiFiClientSecure httpsClient;
-PubSubClient mqttClient(httpsClient);
-QueueHandle_t subMsgQueue;
-QueueHandle_t pubMsgQueue;
+PubSubClient     mqttClient(httpsClient);
+QueueHandle_t    subMsgQueue;
+QueueHandle_t    pubMsgQueue;
 
 /*
 参考
 https://github.com/debsahu/ESP-MQTT-AWS-IoT-Core/blob/master/Arduino/PubSubClient/PubSubClient.ino
 */
 
-static void mqttCallback(char* topic, byte* payload, unsigned int length){
+static void mqttCallback(char* topic, byte* payload, unsigned int length) {
   ESP_LOGI(TAG, "Message arrived");
   ESP_LOGI(TAG, "topic: %s", topic);
   char rev[500];
-  if (length < (unsigned int)500){
-    for (int i=0; i<length;i++){
+  if (length < (unsigned int)500) {
+    for (int i = 0; i < length; i++) {
       rev[i] = (char)payload[i];
     }
-    ESP_LOGI(TAG, "%s", rev); // 一時バッファに格納すると扱える
+    ESP_LOGI(TAG, "%s", rev);  // 一時バッファに格納すると扱える
     xQueueSend(subMsgQueue, rev, 0);
   } else {
     ESP_LOGE(TAG, "Message length: %d is larger 500", length);
@@ -31,7 +31,7 @@ static void mqttCallback(char* topic, byte* payload, unsigned int length){
 }
 
 static void pubSubErr(int8_t MQTTErr) {
-  switch(MQTTErr) {
+  switch (MQTTErr) {
     case MQTT_CONNECTION_TIMEOUT:
       ESP_LOGE(TAG, "Connection tiemout");
       break;
@@ -68,10 +68,10 @@ static void pubSubErr(int8_t MQTTErr) {
   }
 }
 
-static void connectMqtt(){
-  while(!mqttClient.connected()){
-    if(mqttClient.connect(THING_NAME)){
-      if (!mqttClient.subscribe(MQTT_SUB_TOPIC)){
+static void connectMqtt() {
+  while (!mqttClient.connected()) {
+    if (mqttClient.connect(THING_NAME)) {
+      if (!mqttClient.subscribe(MQTT_SUB_TOPIC)) {
         pubSubErr(mqttClient.state());
       }
     } else {
@@ -83,7 +83,7 @@ static void connectMqtt(){
   }
 }
 
-void initMqtt(){
+void initMqtt() {
   httpsClient.setCACert(ROOT_CA);
   httpsClient.setCertificate(CLIENT_CERT);
   httpsClient.setPrivateKey(PRIVATE_KEY);
@@ -94,25 +94,25 @@ void initMqtt(){
   pubMsgQueue = xQueueCreate(1, sizeof(char) * 500);
 }
 
-void mqttTask(void *pvParameters){
+void mqttTask(void* pvParameters) {
   char buf[500];
-  while(1){
+  while (1) {
     mqttClient.loop();
-    if (xQueueReceive(pubMsgQueue, &buf, 0) == pdPASS){
+    if (xQueueReceive(pubMsgQueue, &buf, 0) == pdPASS) {
       mqttClient.publish(MQTT_PUB_TOPIC, buf);
-      ESP_LOGI(TAG, "publish %s", buf); // 一時バッファに格納すると扱える
+      ESP_LOGI(TAG, "publish %s", buf);  // 一時バッファに格納すると扱える
     }
     delay(3000);
   }
   vTaskDelete(NULL);
 }
 
-void mqttRevMsgHandleTask(void *pvParameters){
+void mqttRevMsgHandleTask(void* pvParameters) {
   char buf[500];
   char msg[500] = "{\"message\":\"受け取りました\"}";
-  while(1){
-    if (xQueueReceive(subMsgQueue, &buf, 0) == pdPASS){
-      ESP_LOGI(TAG, "%s", buf); // 一時バッファに格納すると扱える
+  while (1) {
+    if (xQueueReceive(subMsgQueue, &buf, 0) == pdPASS) {
+      ESP_LOGI(TAG, "%s", buf);  // 一時バッファに格納すると扱える
       xQueueSend(pubMsgQueue, msg, 0);
     }
     delay(100);

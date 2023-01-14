@@ -4,9 +4,9 @@
 
 static char TAG[] = "MyWiFi";
 
-void WiFiKeepAliveTask(void *pvParameters){
-  while(1){
-    if(WiFi.status() == WL_CONNECTED){
+void WiFiKeepAliveTask(void *pvParameters) {
+  while (1) {
+    if (WiFi.status() == WL_CONNECTED) {
       ESP_LOGI(TAG, "WiFi still connected");
       delay(30000);
       continue;
@@ -17,9 +17,10 @@ void WiFiKeepAliveTask(void *pvParameters){
 
     unsigned long startAttemptTime = millis();
 
-    while(WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < WIFI_TIMEOUT_MS){}
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < WIFI_TIMEOUT_MS) {
+    }
 
-    if(WiFi.status() != WL_CONNECTED){
+    if (WiFi.status() != WL_CONNECTED) {
       ESP_LOGE(TAG, "FAILED");
       delay(20000);
       continue;
