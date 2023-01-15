@@ -7,6 +7,7 @@
 #include <LittleFS.h>
 #include "MyConfig.h"
 #include "MyFileManage.h"
+#include "MyWiFi.h"
 #include "secrets.h"
 
 #ifndef HTTP_PORT

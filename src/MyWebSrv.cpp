@@ -85,6 +85,15 @@ void myWebSrv() {
     }
   });
 
+  server.on("/api/ap-list", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
+      return request->requestAuthentication();
+    }
+    static char ap_buf[2048];
+    scanWiFiAP(ap_buf, sizeof(ap_buf));
+    return request->send(200, "application/json", ap_buf);
+  });
+
   // Catch-All Handler
   server.onRequestBody(onBody);
   server.onNotFound(onRequest);
