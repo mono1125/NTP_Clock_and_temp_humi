@@ -80,3 +80,10 @@ send_mode_t getSendMode(const Config *p) {
     return NOT_SETTING;
   }
 }
+
+int isEmptyChar(const char *buf) {
+  if ((buf == NULL) || (strlen(buf) == 0)) {
+    return 0;
+  }
+  return -1;
+}

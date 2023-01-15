@@ -86,4 +86,11 @@ extern void printConfig(const Config *p);
 */
 extern send_mode_t getSendMode(const Config *p);
 
+/* 文字列が空かどうかを判定する
+  引数: 評価する文字列
+  戻り値: 0 -> 空 -1 -> 空ではない
+  責務: 文字列が空かどうかを判定する
+*/
+extern int isEmptyChar(const char *buf);
+
 #endif
