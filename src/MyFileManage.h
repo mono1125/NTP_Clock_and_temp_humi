@@ -9,8 +9,13 @@
 #include "esp_log.h"
 
 /*
-  参考
+  (参考)
   https://github.com/espressif/arduino-esp32/blob/master/libraries/LittleFS/examples/LITTLEFS_PlatformIO/src/main.cpp
+
+  PCからのファイル転送方法 (PlatformIO)
+  1. プロジェクト直下に data フォルダを作成
+  2. ESP32に転送したいフォルダ/ファイルを data 内に配置
+  3. $ pio run --target uploadfs でボードへ転送する
 */
 
 #define FORMAT_LITTLEFS_IF_FAILED true
