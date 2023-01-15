@@ -19,7 +19,10 @@
 #endif
 
 extern void initMqtt();
-extern void mqttTask(void *pvParameters);
-extern void mqttRevMsgHandleTask(void *pvParameters);
+extern void mqttTask(void* pvParameters);
+extern void mqttRevMsgHandleTask(void* pvParameters);
 
+static void connectMqtt();
+static void pubSubErr(int8_t MQTTErr);
+static void mqttCallback(char* topic, byte* payload, unsigned int length);
 #endif
