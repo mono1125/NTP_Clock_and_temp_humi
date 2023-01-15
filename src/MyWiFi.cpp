@@ -12,8 +12,7 @@ void WiFiKeepAliveTask(void *pvParameters) {
       continue;
     }
     ESP_LOGI(TAG, "WiFi Connecting");
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    WiFi.reconnect();
 
     unsigned long startAttemptTime = millis();
 
@@ -31,9 +30,27 @@ void WiFiKeepAliveTask(void *pvParameters) {
   vTaskDelete(NULL);
 }
 
-int myWiFibegin() {
+int begin2STAForRUN(const Config *p) {
   WiFi.mode(WIFI_STA);
-  if (WiFi.begin(WIFI_SSID, WIFI_PASS) != WL_DISCONNECTED) {
+  if (p->useDhcp == 0) {
+    IPAddress local_ip, gateway, subnet;
+    IPAddress pub_dns(8, 8, 8, 8);  // Google Public DNS
+    if ((isEmptyChar(p->localIPAddress) == 0) || (isEmptyChar(p->gatewayAddress) == 0) ||
+        (isEmptyChar(p->subnetMask) == 0)) {
+      ESP_LOGE(TAG, "IPアドレスが空文字");
+      return -1;
+    }
+    if ((char2IPAddress(&local_ip, p->localIPAddress) != 0) || (char2IPAddress(&gateway, p->gatewayAddress) != 0) ||
+        (char2IPAddress(&subnet, p->subnetMask) != 0)) {
+      ESP_LOGE(TAG, "文字列からIPアドレスの変換に失敗");
+      return -1;
+    }
+    if (!WiFi.config(local_ip, gateway, subnet, gateway, pub_dns)) {
+      ESP_LOGE(TAG, "IPアドレスの設定に失敗");
+      return -1;
+    }
+  }
+  if (WiFi.begin(p->wifiSsid, p->wifiPass) != WL_DISCONNECTED) {
     ESP_LOGE(TAG, "Not Status WL_DISCONNECTED");
     ESP.restart();
   }
@@ -45,51 +62,61 @@ int myWiFibegin() {
   return 0;
 }
 
-int watchWiFiStatus() {
-  static int rtn_code = 0;
+int begin2STAForCONFIG(const Config *p) {
+  WiFi.mode(WIFI_STA);
+  IPAddress local_ip, gateway, subnet;
+  if ((isEmptyChar(p->gatewayAddress) == 0) || (isEmptyChar(p->subnetMask) == 0)) {
+    ESP_LOGE(TAG, "IPアドレスが空文字");
+    return -1;
+  }
+  if ((char2IPAddress(&local_ip, CONF_MODE_IP) != 0) || (char2IPAddress(&gateway, p->gatewayAddress) != 0) ||
+      (char2IPAddress(&subnet, p->subnetMask) != 0)) {
+    ESP_LOGE(TAG, "文字列からIPアドレスの変換に失敗");
+    return -1;
+  }
+  if (!WiFi.config(local_ip, gateway, subnet, gateway)) {
+    ESP_LOGE(TAG, "IPアドレスの設定に失敗");
+    return -1;
+  }
+  if (WiFi.begin(p->wifiSsid, p->wifiPass) != WL_DISCONNECTED) {
+    ESP_LOGE(TAG, "Not Status WL_DISCONNECTED");
+    ESP.restart();
+  }
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+  }
+  ESP_LOGI(TAG, "WL_CONNECTED");
 
-  switch (WiFi.status()) {
-    case WL_IDLE_STATUS:
-      ESP_LOGI(TAG, "WL_IDLE_STATUS");
-      myWiFibegin();
-      rtn_code = 0;
-      break;
-    case WL_SCAN_COMPLETED:
-      ESP_LOGI(TAG, "WL_SCAN_COMPLETED");
-      rtn_code = 0;
-      break;
-    case WL_CONNECTED:
-      ESP_LOGI(TAG, "WL_CONNECTED");
-      rtn_code = 0;
-      break;
-    case WL_CONNECT_FAILED:
-      ESP_LOGE(TAG, "WL_CONNECT_FAILED");
-      WiFi.disconnect();
-      delay(500);
-      myWiFibegin();
-      rtn_code = 0;
-      break;
-    case WL_CONNECTION_LOST:
-      ESP_LOGW(TAG, "WL_CONNECTION_LOST");
-      WiFi.reconnect();
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-      }
-      rtn_code = 0;
-      break;
-    case WL_DISCONNECTED:
-      ESP_LOGW(TAG, "WL_DISCONNECTED");
-      myWiFibegin();
-      rtn_code = 0;
-      break;
-    default:
-      ESP_LOGE(TAG, "watchWiFiStatus switched default %d", (int)WiFi.status());
-      WiFi.disconnect();
-      delay(500);
-      myWiFibegin();
-      rtn_code = 0;
-      break;
+  return 0;
+}
+
+int begin2AP() {
+  WiFi.mode(WIFI_AP);
+  IPAddress local_ip, subnet;
+  if ((char2IPAddress(&local_ip, CONF_MODE_IP) != 0) || (char2IPAddress(&subnet, CONF_AP_SUBNET) != 0)) {
+    ESP_LOGE(TAG, "文字列からIPアドレスの変換に失敗");
+    return -1;
+  }
+  if (!WiFi.softAPConfig(local_ip, local_ip, subnet)) {
+    ESP_LOGE(TAG, "APの設定に失敗");
+    return -1;
+  }
+  if (!WiFi.softAP(CONF_AP_SSID, CONF_AP_PASS)) {
+    ESP_LOGE(TAG, "APのスタートに失敗");
+    return -1;
   }
 
-  return rtn_code;
+  ESP_LOGI(TAG, "--- Soft AP Start ---");
+  ESP_LOGI(TAG, "Soft AP SSID: " CONF_AP_SSID);
+  ESP_LOGI(TAG, "Soft AP PASS: " CONF_AP_PASS);
+  ESP_LOGI(TAG, "Soft AP MYIP: " CONF_MODE_IP);
+  ESP_LOGI(TAG, "Soft AP SUBNET: " CONF_AP_SUBNET);
+
+  return 0;
+}
+
+static int char2IPAddress(IPAddress *ip, const char *data) {
+  bool rtn;
+  rtn = ip->fromString(data);
+  return rtn == true ? 0 : -1;
 }

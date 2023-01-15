@@ -45,6 +45,51 @@ static float temp = 0;
 struct tm timeInfo;
 Config    config;
 
+static void runMode(Config *config) {
+  if (begin2STAForRUN(config) == 0) {
+    beginNtp(60000);
+    initMqtt();
+    myWebSrv();
+
+    xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
+  } else {
+    ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
+    delay(3000);
+    ESP.restart();
+  }
+
+  initLedDisplay();
+  myI2Cbegin();
+
+  xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
+
+  ESP_LOGI(TAG, "RUN MODE START");
+}
+
+static void confSTAMode(Config *config) {
+  if (begin2STAForCONFIG(config) == 0) {
+    myWebSrv();
+    xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
+  } else {
+    ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
+    delay(3000);
+    ESP.restart();
+  }
+}
+
+static void confAPMode() {
+  if (begin2AP() == 0) {
+    myWebSrv();
+  } else {
+    ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
+    delay(3000);
+    ESP.restart();
+  }
+}
+
 void setup() {
   initOpeModePin();
   initMyFileManage();
@@ -52,21 +97,20 @@ void setup() {
   printConfig(&config);
   ESP_LOGI(TAG, "sendMode: %d", getSendMode(&config));
 
-  if (myWiFibegin() == 0) {
-    beginNtp(60000);
-    initMqtt();
-    myWebSrv();
+  switch (getOpeMode()) {
+    case RUN:
+      runMode(&config);
+      break;
+    case CONF_WIFI_STA:
+      confSTAMode(&config);
+      break;
+    case CONF_WIFI_AP:
+      confAPMode();
+      break;
+    default:
+      ESP_LOGE(TAG, "getOpeMode Error");
+      break;
   }
-
-  initLedDisplay();
-
-  myI2Cbegin();
-
-  xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
-  xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
-  xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
 }
 
 void loop() {
