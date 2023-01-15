@@ -25,7 +25,6 @@ void setConfig(Config *p) {
       return;
     }
   }
-  // TODO: jsonの中身のdeviceNameの一致確認
   const char *device_name = doc["deviceName"];
   if (strcmp(DEVICE_NAME, device_name) != 0) {
     ESP_LOGE(TAG, "DEVICE_NAMEと設定値のdeviceNameが一致しません");
