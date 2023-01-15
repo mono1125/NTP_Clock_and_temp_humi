@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include "MyConfig.h"
 #include "esp_log.h"
 #include "secrets.h"
 
@@ -18,9 +19,36 @@
 #define MQTT_PORT 8883
 #endif
 
-extern void initMqtt();
+/* MQTT データ構造 */
+typedef struct {
+  char topic[50];
+  char data[1024];
+} MQTTData;
+
+/* MQTTの初期設定をする
+  引数: なし
+  責務: MQTTの初期設定をする
+    MQTT認証情報・エンドポイントの設定
+    Subscribeしたときのコールバック関数の登録
+    MQTT接続
+    キューの作成
+*/
+extern void initMqtt(const Config* p);
+
 extern void mqttTask(void* pvParameters);
 extern void mqttRevMsgHandleTask(void* pvParameters);
+
+/* トピックの設定をする
+  引数: 構造体 Config
+  責務: 設定値をもとにトピックを設定する
+*/
+static void initTopic(const Config* p);
+
+/* キューの作成
+  引数: なし
+  責務: キューの作成をする
+*/
+static void initQueue();
 
 static void connectMqtt();
 static void pubSubErr(int8_t MQTTErr);

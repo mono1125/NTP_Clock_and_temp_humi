@@ -48,7 +48,7 @@ Config    config;
 static void runMode(Config *config) {
   if (begin2STAForRUN(config) == 0) {
     beginNtp(60000);
-    initMqtt();
+    initMqtt(config);
     myWebSrv();
 
     xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
