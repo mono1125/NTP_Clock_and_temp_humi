@@ -25,4 +25,6 @@
 
 extern void myWebSrv();
 
+static void printWebSrvInfo();
+
 #endif

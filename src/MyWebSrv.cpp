@@ -37,6 +37,8 @@ void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t in
 }
 
 void myWebSrv() {
+  printWebSrvInfo();
+
   server.on("/heap", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
@@ -109,4 +111,12 @@ void myWebSrv() {
   server.onNotFound(onRequest);
 
   server.begin();
+}
+
+static void printWebSrvInfo() {
+  ESP_LOGI(TAG, "--- Web Server Info ---");
+  ESP_LOGI(TAG, "HTTP_PORT: %d", HTTP_PORT);
+  ESP_LOGI(TAG, "HTTP_USER: ", HTTP_USER);
+  ESP_LOGI(TAG, "HTTP_PASS: ", HTTP_PASS);
+  ESP_LOGI(TAG, "--- Web Server Info ---");
 }
