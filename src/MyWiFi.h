@@ -2,6 +2,7 @@
 #define MY_WIFI_H
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <MyConfig.h>
 #include <WiFi.h>
 #include "esp_log.h"
@@ -44,6 +45,24 @@ extern int begin2AP();
   責務: 定周期でのWi-Fi接続状態監視をして、切れていれば再接続を行う
 */
 extern void WiFiKeepAliveTask(void *pvParameters);
+
+/* 周囲のWi-Fi APをスキャンしてリストを返す
+  引数: 結果を格納する配列 buf
+      配列の長さ buf_len
+  責務: 周囲のWi-FiをスキャンしてシリアライズされたJSON文字列を返す
+  データ構造
+    {
+      "data": [
+        {
+          "ssid": "hogehogehogehoge",
+          "rssi": -65,
+          "ch": 20,
+          "enc": 1
+        }
+      ]
+    }
+*/
+extern void scanWiFiAP(char *buf, size_t buf_len);
 
 /* 文字列のIPアドレスをIPAddress型に変換する
   引数: 変換した結果を格納する IPAddress

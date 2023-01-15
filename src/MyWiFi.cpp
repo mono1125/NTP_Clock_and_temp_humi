@@ -115,6 +115,32 @@ int begin2AP() {
   return 0;
 }
 
+void scanWiFiAP(char *buf, size_t buf_len) {
+  int i   = 0;
+  int max = 10;
+  int n   = WiFi.scanNetworks();
+  if (n == 0) {
+    sprintf(buf, "{\"data\": []}");
+    ESP_LOGI(TAG, "No Networks found");
+    return;
+  }
+  ESP_LOGI(TAG, "%d Networks found", n);
+  DynamicJsonDocument doc(buf_len + 512);
+  JsonArray           root = doc.createNestedArray("data");
+
+  while ((i < n) && (i < max)) {
+    JsonObject obj = root.createNestedObject();
+    obj["ssid"]    = WiFi.SSID(i).c_str();
+    obj["rssi"]    = WiFi.RSSI(i);
+    obj["ch"]      = WiFi.channel(i);
+    obj["enc"]     = WiFi.encryptionType(i) == 0 ? 0 : 1;
+    i++;
+  }
+
+  WiFi.scanDelete();  // free memory
+  serializeJson(doc, buf, buf_len);
+}
+
 static int char2IPAddress(IPAddress *ip, const char *data) {
   bool rtn;
   rtn = ip->fromString(data);
