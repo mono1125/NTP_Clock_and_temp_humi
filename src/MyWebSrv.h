@@ -19,6 +19,9 @@
 #ifndef HTTP_PASS
 #define HTTP_PASS "passw0rd"
 #endif
+#ifndef THING_NAME
+#define THING_NAME "default thing (aws iot)"
+#endif
 
 extern void myWebSrv();
 

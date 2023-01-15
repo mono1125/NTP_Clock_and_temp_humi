@@ -85,6 +85,16 @@ void myWebSrv() {
     }
   });
 
+  server.on("/api/thing", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
+      return request->requestAuthentication();
+    }
+    static char thing_buf[50];
+    // {"thing": "default thing (aws iot)"}
+    sprintf(thing_buf, "{\"thing\":\"" THING_NAME "\"}");
+    return request->send(200, "application/json", thing_buf);
+  });
+
   server.on("/api/ap-list", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
