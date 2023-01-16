@@ -26,6 +26,14 @@
 */
 extern void initMyFileManage();
 
+/* ファイルを読みその内容を返す
+  引数: 設定ファイルの内容を格納する配列 buf
+        格納する配列長 buf_len
+  戻り値: 0 -> 正常 -1-> 異常
+  責務: LittleFS内のファイルを返す
+*/
+extern int getFile(char *path, char *buf, size_t buf_len);
+
 /* JSONファイルを読みJSONオブジェクトを取得する
   引数: JSONファイルのパス
       読んだ結果を格納するJSONオブジェクト

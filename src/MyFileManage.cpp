@@ -11,6 +11,14 @@ void initMyFileManage() {
   listDir(LittleFS, "/", 2);
 }
 
+int getFile(char *path, char *buf, size_t buf_len) {
+  if (readFile(LittleFS, path, buf, buf_len) != 0) {
+    ESP_LOGE(TAG, "Error Get File");
+    return -1;
+  }
+  return 0;
+}
+
 int getJsonObj(const char *path, JsonDocument &doc) {
   static char buf[2048];
   if (readFile(LittleFS, path, buf, sizeof(buf)) != 0) {
