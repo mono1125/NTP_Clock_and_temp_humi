@@ -22,11 +22,12 @@ void initMqtt(const Config* p) {
   httpsClient.setCertificate(CLIENT_CERT);
   httpsClient.setPrivateKey(PRIVATE_KEY);
   mqttClient.setServer(MQTT_ENDPOINT, MQTT_PORT);
-  mqttClient.setBufferSize(1024);
+  mqttClient.setBufferSize(2048);
   mqttClient.setCallback(mqttCallback);
   initTopic(p);
   connectMqtt();
   initQueue();
+  ESP_LOGI(TAG, "Buffer Size: %d", mqttClient.getBufferSize());
 }
 
 static void initTopic(const Config* p) {
@@ -75,6 +76,7 @@ void mqttTask(void* pvParameters) {
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else {
         ESP_LOGE(TAG, "(publish Error) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
+        mqttClient.publish(mqtt_data.topic, mqtt_data.data);
       }
     }
     delay(2000);
@@ -87,16 +89,57 @@ void mqttTask(void* pvParameters) {
 */
 void mqttRevMsgHandleTask(void* pvParameters) {
   static MQTTData receive_data;
-
   static MQTTData response_data;
-  sprintf(response_data.topic, "%s/1", DEV_LOG_PUB_TOPIC);
-  sprintf(response_data.data, "{\"message\":\"受け取りました\"}");
 
   while (1) {
     if (xQueueReceive(subQueue, &receive_data, 0) == pdPASS) {
+      /* begin --- TODO: Read From Littlefs Not working ---*/
+      if (strcmp(receive_data.topic, "conf/" THING_NAME "/get-config") == 0) {
+        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+        static char buf[1024];
+        if (getConfig(buf, sizeof(buf)) == 0) {
+          // message hardcoding is working!
+          // strncpy(response_data.data,
+          //         "{\"deviceName\": \"ESP32\", \"deviceId\": \"0\", \"localIPAddress\": \"192.168.1.1\", "
+          //         "\"subnetMask\": \"255.255.255.0\", "
+          //         "\"gatewayAddress\": \"192.168.1.1\", \"useDhcp\": \"0\", \"sendMode\": \"0\", \"targetIPAddress\":
+          //         "
+          //         "\"192.168.1.2\", "
+          //         "\"targetPort\": \"50000\", \"wifiSsid\": \"testssid\", \"wifiPass\": \"testpass\", "
+          //         "\"testPubTopic\": \"hogehogehoge\", \"prodPubTopic\": \"hogehogehoge\", \"devLogPubTopic\": "
+          //         "\"hogehogehoge\", \"confSubTopic\": \"hogehogehoge\" }",
+          //         sizeof(response_data.data) - 1);
+          memmove(response_data.data, buf, sizeof(response_data.data) - 1);
+          ESP_LOGI(TAG, "buf: %s", buf);
+        }
+        xQueueSend(pubQueue, &response_data, 0);
+      }
+      /* end --- TODO: Read From Littlefs Not working ---*/
+
+      /* update config */
+      if (strcmp(receive_data.topic, "conf/" THING_NAME "/set-config") == 0) {
+        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+        static DynamicJsonDocument doc(2048);
+        if (myDeserializeJson(doc, receive_data.data) == 0) {
+          if (writeJsonFile("/new_config.json", doc) == 0) {
+            sprintf(response_data.data, "{\"message\": \"config updated!\"}");
+            xQueueSend(pubQueue, &response_data, 0);
+          }
+        }
+      }
+
+      /* reboot */
+      if (strcmp(receive_data.topic, "conf/" THING_NAME "/reboot") == 0) {
+        ESP_LOGI(TAG, "Reboot Topic! will reboot after 2 seconds...");
+        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+        sprintf(response_data.data, "{\"message\": \"Receive Reboot Topic! will reboot ...\"}");
+        xQueueSend(pubQueue, &response_data, 0);
+        delay(2000);
+        ESP.restart();
+      }
+
       ESP_LOGI(TAG, "topic: %s", receive_data.topic);
       ESP_LOGI(TAG, "data: %s", receive_data.data);
-      xQueueSend(pubQueue, &response_data, 0);
     }
     delay(100);
   }

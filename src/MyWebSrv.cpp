@@ -87,6 +87,21 @@ void myWebSrv() {
     }
   });
 
+  /* For test */
+  server.on("/api/new-config", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
+      return request->requestAuthentication();
+    }
+    if (LittleFS.exists("/new_config.json")) {
+      ESP_LOGD(TAG, "response: /new_config.json");
+      return request->send(LittleFS, "/new_config.json");
+    } else {
+      ESP_LOGD(TAG, "response: Not exists Config Files");
+      return request->send(500, "application/json", "{\"message\":\"Not exists Config Files\"}");
+    }
+  });
+  /* For test */
+
   server.on("/api/thing", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
       return request->requestAuthentication();
