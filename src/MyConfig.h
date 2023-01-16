@@ -67,6 +67,14 @@ extern void initOpeModePin();
 */
 extern operation_mode_t getOpeMode();
 
+/* 設定ファイルを取得する
+  引数: 設定ファイルの内容を格納する配列 buf
+        格納する配列長 buf_len
+  戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定ファイル(config.json or default_config.json)を読みその内容を格納する
+*/
+extern int getConfig(char *buf, size_t buf_len);
+
 /* 構造体Configに値をセットする
   引数: 構造体 Config
   責務: 設定ファイルを読みその内容を構造体Configにセットする

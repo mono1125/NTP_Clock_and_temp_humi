@@ -17,6 +17,16 @@ operation_mode_t getOpeMode() {
   }
 }
 
+int getConfig(char *buf, size_t buf_len) {
+  if (getFile("/config.json", buf, buf_len) != 0) {
+    if (getFile("/default_config.json", buf, buf_len) != 0) {
+      ESP_LOGE(TAG, "Config File Error");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 void setConfig(Config *p) {
   DynamicJsonDocument doc(2048);
   if (getJsonObj("/config.json", doc) != 0) {
