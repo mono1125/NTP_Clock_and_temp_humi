@@ -89,37 +89,24 @@ void mqttTask(void* pvParameters) {
 */
 void mqttRevMsgHandleTask(void* pvParameters) {
   static MQTTData receive_data;
-  static MQTTData response_data;
+  MQTTData        response_data;
 
   while (1) {
     if (xQueueReceive(subQueue, &receive_data, 0) == pdPASS) {
-      /* begin --- TODO: Read From Littlefs Not working ---*/
+      /* get-config */
       if (strcmp(receive_data.topic, "conf/" THING_NAME "/get-config") == 0) {
         sprintf(response_data.topic, "dev/" THING_NAME "/response");
-        static char buf[1024];
-        if (getConfig(buf, sizeof(buf)) == 0) {
-          // message hardcoding is working!
-          // strncpy(response_data.data,
-          //         "{\"deviceName\": \"ESP32\", \"deviceId\": \"0\", \"localIPAddress\": \"192.168.1.1\", "
-          //         "\"subnetMask\": \"255.255.255.0\", "
-          //         "\"gatewayAddress\": \"192.168.1.1\", \"useDhcp\": \"0\", \"sendMode\": \"0\", \"targetIPAddress\":
-          //         "
-          //         "\"192.168.1.2\", "
-          //         "\"targetPort\": \"50000\", \"wifiSsid\": \"testssid\", \"wifiPass\": \"testpass\", "
-          //         "\"testPubTopic\": \"hogehogehoge\", \"prodPubTopic\": \"hogehogehoge\", \"devLogPubTopic\": "
-          //         "\"hogehogehoge\", \"confSubTopic\": \"hogehogehoge\" }",
-          //         sizeof(response_data.data) - 1);
-          memmove(response_data.data, buf, sizeof(response_data.data) - 1);
-          ESP_LOGI(TAG, "buf: %s", buf);
+        memset(response_data.data, '\0', sizeof(response_data.data));  // Important!!
+        // if (getFile("/config.json", response_data.data, sizeof(response_data.data)) == 0) {
+        if (getFile("/new_config.json", response_data.data, sizeof(response_data.data)) == 0) {
+          xQueueSend(pubQueue, &response_data, 0);
         }
-        xQueueSend(pubQueue, &response_data, 0);
       }
-      /* end --- TODO: Read From Littlefs Not working ---*/
 
       /* update config */
       if (strcmp(receive_data.topic, "conf/" THING_NAME "/set-config") == 0) {
         sprintf(response_data.topic, "dev/" THING_NAME "/response");
-        static DynamicJsonDocument doc(2048);
+        DynamicJsonDocument doc(2048);
         if (myDeserializeJson(doc, receive_data.data) == 0) {
           if (writeJsonFile("/new_config.json", doc) == 0) {
             sprintf(response_data.data, "{\"message\": \"config updated!\"}");

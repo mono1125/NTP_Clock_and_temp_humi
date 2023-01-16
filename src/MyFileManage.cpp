@@ -7,7 +7,6 @@ void initMyFileManage() {
     ESP_LOGE(TAG, "LittleFS Mount Failed");
     return;
   }
-  static char buf[1024];
   listDir(LittleFS, "/", 2);
 }
 
@@ -20,7 +19,7 @@ int getFile(char *path, char *buf, size_t buf_len) {
 }
 
 int getJsonObj(const char *path, JsonDocument &doc) {
-  static char buf[2048];
+  char buf[2048];  // TODO malloc or nullclear
   if (readFile(LittleFS, path, buf, sizeof(buf)) != 0) {
     ESP_LOGE(TAG, "readFile Error");
     return -1;
@@ -32,7 +31,7 @@ int getJsonObj(const char *path, JsonDocument &doc) {
 }
 
 int writeJsonFile(const char *path, JsonDocument &doc) {
-  static char buf[2048];
+  char buf[2048];  // TODO malloc or nullclear
 
   serializeJson(doc, buf);
   if (writeFile(LittleFS, path, buf) != 0) {
@@ -71,7 +70,7 @@ static void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
 }
 
 static void printFile(fs::FS &fs, const char *path) {
-  static char buf[1024];
+  char buf[1024];  // TODO malloc or null clear
   if (fs.exists(path)) {
     readFile(LittleFS, path, buf, sizeof(buf));
     ESP_LOGI(TAG, "READ FILE (%s): %s", path, buf);
@@ -79,7 +78,7 @@ static void printFile(fs::FS &fs, const char *path) {
 }
 
 static int readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_len) {
-  static unsigned int i = 0;
+  unsigned int i = 0;
 
   ESP_LOGI(TAG, "Reading file: %s, Buffer size: %d", path, buf_len);
 
@@ -108,7 +107,7 @@ static int readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_le
 }
 
 static int writeFile(fs::FS &fs, const char *path, const char *data) {
-  static int return_code = 0;
+  int return_code = 0;
   ESP_LOGI(TAG, "Writing file: %s", path);
 
   File file = fs.open(path, FILE_WRITE);
@@ -128,7 +127,7 @@ static int writeFile(fs::FS &fs, const char *path, const char *data) {
 }
 
 int myDeserializeJson(JsonDocument &doc, char *data) {
-  static int return_code = 0;
+  int return_code = 0;
 
   DeserializationError err = deserializeJson(doc, data);
   switch (err.code()) {
