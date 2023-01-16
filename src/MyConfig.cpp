@@ -69,6 +69,8 @@ void printConfig(const Config *p) {
   ESP_LOGI(TAG, "(Config) sendMode: %d", p->sendMode);
   ESP_LOGI(TAG, "(Config) targetIPAddress: %s", p->targetIPAddress);
   ESP_LOGI(TAG, "(Config) targetPort: %d", p->targetPort);
+  ESP_LOGI(TAG, "(Config  wifiSsid: %s", p->wifiSsid);
+  ESP_LOGI(TAG, "(Config  wifiPass: %s", p->wifiPass);
   ESP_LOGI(TAG, "(Config) testPubTopic: %s", p->testPubTopic);
   ESP_LOGI(TAG, "(Config) prodPubTopic: %s", p->prodPubTopic);
   ESP_LOGI(TAG, "(Config) devLogPubTopic: %s", p->devLogPubTopic);
