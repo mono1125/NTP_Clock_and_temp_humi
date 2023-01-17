@@ -133,7 +133,7 @@ void myWebSrv() {
 static void printWebSrvInfo() {
   ESP_LOGI(TAG, "--- Web Server Info ---");
   ESP_LOGI(TAG, "HTTP_PORT: %d", HTTP_PORT);
-  ESP_LOGI(TAG, "HTTP_USER: ", HTTP_USER);
-  ESP_LOGI(TAG, "HTTP_PASS: ", HTTP_PASS);
+  ESP_LOGI(TAG, "HTTP_USER: %s", HTTP_USER);
+  ESP_LOGI(TAG, "HTTP_PASS: %s", HTTP_PASS);
   ESP_LOGI(TAG, "--- Web Server Info ---");
 }
