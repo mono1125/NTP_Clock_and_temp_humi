@@ -71,8 +71,8 @@ void mqttRevMsgHandleTask(void* pvParameters) {
   while (1) {
     if (xQueueReceive(subQueue, &receive_data, 0) == pdPASS) {
       /* get-config */
-      if (strcmp(receive_data.topic, "conf/" THING_NAME "/get-config") == 0) {
-        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+      if (strcmp(receive_data.topic, "CONF/" THING_NAME "/get-config") == 0) {
+        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
         memset(response_data.data, '\0', sizeof(response_data.data));  // Important!!
         // if (getFile("/config.json", response_data.data, sizeof(response_data.data)) == 0) {
         if (getFile("/new_config.json", response_data.data, sizeof(response_data.data)) == 0) {
@@ -81,8 +81,8 @@ void mqttRevMsgHandleTask(void* pvParameters) {
       }
 
       /* update config */
-      if (strcmp(receive_data.topic, "conf/" THING_NAME "/set-config") == 0) {
-        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+      if (strcmp(receive_data.topic, "CONF/" THING_NAME "/set-config") == 0) {
+        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
         DynamicJsonDocument doc(2048);
         if (myDeserializeJson(doc, receive_data.data) == 0) {
           if (writeJsonFile("/new_config.json", doc) == 0) {
@@ -93,9 +93,9 @@ void mqttRevMsgHandleTask(void* pvParameters) {
       }
 
       /* reboot */
-      if (strcmp(receive_data.topic, "conf/" THING_NAME "/reboot") == 0) {
+      if (strcmp(receive_data.topic, "CONF/" THING_NAME "/reboot") == 0) {
         ESP_LOGI(TAG, "Reboot Topic! will reboot after 2 seconds...");
-        sprintf(response_data.topic, "dev/" THING_NAME "/response");
+        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
         sprintf(response_data.data, "{\"message\": \"Receive Reboot Topic! will reboot ...\"}");
         xQueueSend(pubQueue, &response_data, 0);
         delay(2000);
