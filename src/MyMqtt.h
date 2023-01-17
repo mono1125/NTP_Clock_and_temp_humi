@@ -48,15 +48,15 @@ extern void mqttRevMsgHandleTask(void* pvParameters);
   引数: 構造体 Config
   責務: 設定値をもとにトピックを設定する
 */
-static void initTopic(const Config* p);
+// static void initTopic(const Config* p);
 
 /* キューの作成
   引数: なし
   責務: キューの作成をする
 */
-static void initQueue();
+// static void initQueue();
 
-static void connectMqtt();
-static void pubSubErr(int8_t MQTTErr);
-static void mqttCallback(char* topic, byte* payload, unsigned int length);
+// static void connectMqtt();
+// static void pubSubErr(int8_t MQTTErr);
+// static void mqttCallback(char* topic, byte* payload, unsigned int length);
 #endif

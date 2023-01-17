@@ -2,6 +2,14 @@
 
 static char TAG[] = "MyMqtt";
 
+/* 内部 */
+static void initTopic(const Config* p);
+static void initQueue();
+static void connectMqtt();
+static void pubSubErr(int8_t MQTTErr);
+static void mqttCallback(char* topic, byte* payload, unsigned int length);
+/* 内部 */
+
 static char TEST_PUB_TOPIC[50];
 static char PROD_PUB_TOPIC[50];
 static char DEV_LOG_PUB_TOPIC[50];
