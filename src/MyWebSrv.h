@@ -25,6 +25,10 @@
 
 extern void myWebSrv();
 
-static void printWebSrvInfo();
+/* Webサーバの情報をコンソールに出力する
+  引数: なし
+  責務: Webサーバの情報をコンソールに出力する
+*/
+// static void printWebSrvInfo();
 
 #endif

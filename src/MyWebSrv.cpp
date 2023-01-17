@@ -1,15 +1,18 @@
 #include "MyWebSrv.h"
 
 static char TAG[] = "MyWebSrv";
+/* 内部 */
+static void printWebSrvInfo();
+/* 内部 */
 
 static AsyncWebServer server(HTTP_PORT);
 
-void onRequest(AsyncWebServerRequest *request) {
+static void onRequest(AsyncWebServerRequest *request) {
   // Handle Unknown Request
   request->send(404);
 }
 
-void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+static void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
   if (!request->authenticate(HTTP_USER, HTTP_PASS)) {
     return request->requestAuthentication();
   }
