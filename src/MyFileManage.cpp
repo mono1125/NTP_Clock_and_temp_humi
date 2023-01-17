@@ -2,6 +2,13 @@
 
 static char TAG[] = "MyFileManage";
 
+/* 内部 */
+static void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
+static void printFile(fs::FS &fs, const char *path);
+static int  readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_len);
+static int  writeFile(fs::FS &fs, const char *path, const char *data);
+/* 内部 */
+
 void initMyFileManage() {
   if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
     ESP_LOGE(TAG, "LittleFS Mount Failed");

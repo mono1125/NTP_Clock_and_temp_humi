@@ -58,14 +58,14 @@ extern int writeJsonFile(const char *path, JsonDocument &doc);
       リストする深さ levels
   責務: ディレクトリ, ファイルをリストする
 */
-static void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
+// static void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
 
 /* 指定したパスのファイルをコンソール出力する
   引数: File (LittleFS)
       出力するファイルパス path
   責務: 指定されたファイルを読みコンソールに出力する
 */
-static void printFile(fs::FS &fs, const char *path);
+// static void printFile(fs::FS &fs, const char *path);
 
 /* ファイルを読む
   引数: File (LittleFS)
@@ -75,7 +75,7 @@ static void printFile(fs::FS &fs, const char *path);
   戻り値: 0 -> 正常 -1-> 異常
   責務: 指定されたファイルを読み、その結果を配列に格納する
 */
-static int readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_len);
+// static int readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_len);
 
 /* ファイルを書き込む
   引数: File (LittleFS)
@@ -84,7 +84,7 @@ static int readFile(fs::FS &fs, const char *path, char *buf, const size_t buf_le
   戻り値: 0 -> 正常 -1-> 異常
   責務: 指定されたパスにデータを書き込む
 */
-static int writeFile(fs::FS &fs, const char *path, const char *data);
+// static int writeFile(fs::FS &fs, const char *path, const char *data);
 
 /* 外部 */
 /* --- JSON操作用 --- */
