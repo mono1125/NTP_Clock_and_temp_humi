@@ -20,6 +20,14 @@
 #define MQTT_ENDPOINT "xxxxxxxxxxxxxx.iot.ap-northeast-1.amazonaws.com"
 #define MQTT_PORT     8883
 
+/* MQTT Topic */
+extern const char TEST_PUB_TOPIC[];
+extern const char PROD_PUB_TOPIC[];
+extern const char DEVICE_CPU_TEMP_PUB_TOPIC[];
+extern const char DEVICE_FREE_HEAP_PUB_TOPIC[];
+extern const char DEVICE_RESPONSE_PUB_TOPIC[];
+extern const char CONF_SUB_TOPIC[];
+
 /* Amazon ROOT CA */
 extern const char ROOT_CA[];
 /* Device Cert */

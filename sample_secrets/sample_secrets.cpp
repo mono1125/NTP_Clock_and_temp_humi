@@ -1,5 +1,13 @@
 #include "sample_secrets.h"
 
+/* MQTT Topic */
+const char TEST_PUB_TOPIC[]             = "TEST/" THING_NAME "/humi-and-temp";
+const char PROD_PUB_TOPIC[]             = "PROD/" THING_NAME "/humi-and-temp";
+const char DEVICE_CPU_TEMP_PUB_TOPIC[]  = "DEVICE/" THING_NAME "/cpu-temp";
+const char DEVICE_FREE_HEAP_PUB_TOPIC[] = "DEVICE/" THING_NAME "/free-heap";
+const char DEVICE_RESPONSE_PUB_TOPIC[]  = "DEVICE/" THING_NAME "/response";
+const char CONF_SUB_TOPIC[]             = "CONF/" THING_NAME "/#";
+
 /* Amazon Root CA */
 const char ROOT_CA[] = R"EOF(
 -----BEGIN CERTIFICATE-----
