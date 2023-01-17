@@ -69,22 +69,6 @@ int checkConfigParams(JsonDocument &doc) {
     ESP_LOGE(TAG, "Not Exists Key: wifiPass");
     return -1;
   }
-  if (!doc.containsKey("testPubTopic")) {
-    ESP_LOGE(TAG, "Not Exists Key: testPubTopic");
-    return -1;
-  }
-  if (!doc.containsKey("prodPubTopic")) {
-    ESP_LOGE(TAG, "Not Exists Key: prodPubTopic");
-    return -1;
-  }
-  if (!doc.containsKey("devLogPubTopic")) {
-    ESP_LOGE(TAG, "Not Exists Key: devLogPubTopic");
-    return -1;
-  }
-  if (!doc.containsKey("confSubTopic")) {
-    ESP_LOGE(TAG, "Not Exists Key: confSubTopic");
-    return -1;
-  }
   ESP_LOGI(TAG, "Finish check config params!");
   return 0;
 }
@@ -116,10 +100,6 @@ void setConfig(Config *p) {
   p->targetPort      = doc["targetPort"];
   p->wifiSsid        = doc["wifiSsid"];
   p->wifiPass        = doc["wifiPass"];
-  p->testPubTopic    = doc["testPubTopic"];
-  p->prodPubTopic    = doc["prodPubTopic"];
-  p->devLogPubTopic  = doc["devLogPubTopic"];
-  p->confSubTopic    = doc["confSubTopic"];
 }
 
 void printConfig(const Config *p) {
@@ -133,10 +113,6 @@ void printConfig(const Config *p) {
   ESP_LOGI(TAG, "(Config) targetPort: %d", p->targetPort);
   ESP_LOGI(TAG, "(Config  wifiSsid: %s", p->wifiSsid);
   ESP_LOGI(TAG, "(Config  wifiPass: %s", p->wifiPass);
-  ESP_LOGI(TAG, "(Config) testPubTopic: %s", p->testPubTopic);
-  ESP_LOGI(TAG, "(Config) prodPubTopic: %s", p->prodPubTopic);
-  ESP_LOGI(TAG, "(Config) devLogPubTopic: %s", p->devLogPubTopic);
-  ESP_LOGI(TAG, "(Config) ConfSubTopic: %s", p->confSubTopic);
 }
 
 send_mode_t getSendMode(const Config *p) {

@@ -9,9 +9,5 @@
     "targetIPAddress": "",
     "targetPort": "50000",
     "wifiSsid": "testssid",
-    "wifiPass": "testpass",
-    "testPubTopic": "",
-    "prodPubTopic": "",
-    "devLogPubTopic": "",
-    "confSubTopic": ""
+    "wifiPass": "testpass"
 }

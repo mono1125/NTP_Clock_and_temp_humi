@@ -3,17 +3,11 @@
 static char TAG[] = "MyMqtt";
 
 /* 内部 */
-static void initTopic(const Config* p);
 static void initQueue();
 static void connectMqtt();
 static void pubSubErr(int8_t MQTTErr);
 static void mqttCallback(char* topic, byte* payload, unsigned int length);
 /* 内部 */
-
-static char TEST_PUB_TOPIC[50];
-static char PROD_PUB_TOPIC[50];
-static char DEV_LOG_PUB_TOPIC[50];
-static char CONF_SUB_TOPIC[50];
 
 WiFiClientSecure              httpsClient;
 PubSubClient                  mqttClient(httpsClient);
@@ -32,40 +26,9 @@ void initMqtt(const Config* p) {
   mqttClient.setServer(MQTT_ENDPOINT, MQTT_PORT);
   mqttClient.setBufferSize(2048);
   mqttClient.setCallback(mqttCallback);
-  initTopic(p);
   connectMqtt();
   initQueue();
   ESP_LOGI(TAG, "Buffer Size: %d", mqttClient.getBufferSize());
-}
-
-static void initTopic(const Config* p) {
-  if (isEmptyChar(p->testPubTopic) != 0) {
-    sprintf(TEST_PUB_TOPIC, "test/" THING_NAME "/%s", p->testPubTopic);
-    ESP_LOGD(TAG, "testPubTopic: %s", TEST_PUB_TOPIC);
-  } else {
-    ESP_LOGE(TAG, "設定ファイルの testPubTopic が空です");
-  }
-
-  if (isEmptyChar(p->prodPubTopic) != 0) {
-    sprintf(PROD_PUB_TOPIC, "prod/" THING_NAME "/%s", p->prodPubTopic);
-    ESP_LOGD(TAG, "prodPubTopic: %s", PROD_PUB_TOPIC);
-  } else {
-    ESP_LOGE(TAG, "設定ファイルの prodPubTopic が空です");
-  }
-
-  if (isEmptyChar(p->devLogPubTopic) != 0) {
-    sprintf(DEV_LOG_PUB_TOPIC, "dev/" THING_NAME "/%s", p->devLogPubTopic);
-    ESP_LOGD(TAG, "devLogPubTopic: %s", DEV_LOG_PUB_TOPIC);
-  } else {
-    ESP_LOGE(TAG, "設定ファイルの devLogPubTopic が空です");
-  }
-
-  if (isEmptyChar(p->confSubTopic) != 0) {
-    sprintf(CONF_SUB_TOPIC, "conf/" THING_NAME "/%s", p->confSubTopic);
-    ESP_LOGD(TAG, "confSubTopic: %s", CONF_SUB_TOPIC);
-  } else {
-    ESP_LOGE(TAG, "設定ファイルの confSubTopic が空です");
-  }
 }
 
 void mqttTask(void* pvParameters) {
@@ -79,8 +42,14 @@ void mqttTask(void* pvParameters) {
       } else if (strcmp(mqtt_data.topic, PROD_PUB_TOPIC) == 0) {
         mqttClient.publish(PROD_PUB_TOPIC, mqtt_data.data);
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
-      } else if (strcmp(mqtt_data.topic, DEV_LOG_PUB_TOPIC) == 0) {
-        mqttClient.publish(DEV_LOG_PUB_TOPIC, mqtt_data.data);
+      } else if (strcmp(mqtt_data.topic, DEVICE_CPU_TEMP_PUB_TOPIC) == 0) {
+        mqttClient.publish(DEVICE_CPU_TEMP_PUB_TOPIC, mqtt_data.data);
+        ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
+      } else if (strcmp(mqtt_data.topic, DEVICE_FREE_HEAP_PUB_TOPIC) == 0) {
+        mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data);
+        ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
+      } else if (strcmp(mqtt_data.topic, DEVICE_RESPONSE_PUB_TOPIC) == 0) {
+        mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data);
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else {
         ESP_LOGE(TAG, "(publish Error) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);

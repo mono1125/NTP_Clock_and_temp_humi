@@ -49,12 +49,6 @@ extern void mqttRevMsgHandleTask(void* pvParameters);
 
 /* 内部 */
 
-/* トピックの設定をする
-  引数: 構造体 Config
-  責務: 設定値をもとにトピックを設定する
-*/
-// static void initTopic(const Config* p);
-
 /* キューの作成
   引数: なし
   責務: キューの作成をする
