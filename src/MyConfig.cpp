@@ -27,6 +27,68 @@ int getConfig(char *buf, size_t buf_len) {
   return 0;
 }
 
+int checkConfigParams(JsonDocument &doc) {
+  ESP_LOGI(TAG, "Start check config params...");
+  if (!doc.containsKey("deviceName")) {
+    ESP_LOGE(TAG, "Not Exists Key: deviceName");
+    return -1;
+  }
+  if (!doc.containsKey("localIPAddress")) {
+    ESP_LOGE(TAG, "Not Exists Key: localIPAddress");
+    return -1;
+  }
+  if (!doc.containsKey("subnetMask")) {
+    ESP_LOGE(TAG, "Not Exists Key: subnetMask");
+    return -1;
+  }
+  if (!doc.containsKey("gatewayAddress")) {
+    ESP_LOGE(TAG, "Not Exists Key: gatewayAddress");
+    return -1;
+  }
+  if (!doc.containsKey("useDhcp")) {
+    ESP_LOGE(TAG, "Not Exists Key: useDhcp");
+    return -1;
+  }
+  if (!doc.containsKey("sendMode")) {
+    ESP_LOGE(TAG, "Not Exists Key: sendMode");
+    return -1;
+  }
+  if (!doc.containsKey("targetIPAddress")) {
+    ESP_LOGE(TAG, "Not Exists Key: targetIPAddress");
+    return -1;
+  }
+  if (!doc.containsKey("targetPort")) {
+    ESP_LOGE(TAG, "Not Exists Key: targetPort");
+    return -1;
+  }
+  if (!doc.containsKey("wifiSsid")) {
+    ESP_LOGE(TAG, "Not Exists Key: wifiSsid");
+    return -1;
+  }
+  if (!doc.containsKey("wifiPass")) {
+    ESP_LOGE(TAG, "Not Exists Key: wifiPass");
+    return -1;
+  }
+  if (!doc.containsKey("testPubTopic")) {
+    ESP_LOGE(TAG, "Not Exists Key: testPubTopic");
+    return -1;
+  }
+  if (!doc.containsKey("prodPubTopic")) {
+    ESP_LOGE(TAG, "Not Exists Key: prodPubTopic");
+    return -1;
+  }
+  if (!doc.containsKey("devLogPubTopic")) {
+    ESP_LOGE(TAG, "Not Exists Key: devLogPubTopic");
+    return -1;
+  }
+  if (!doc.containsKey("confSubTopic")) {
+    ESP_LOGE(TAG, "Not Exists Key: confSubTopic");
+    return -1;
+  }
+  ESP_LOGI(TAG, "Finish check config params!");
+  return 0;
+}
+
 void setConfig(Config *p) {
   DynamicJsonDocument doc(2048);
   if (getJsonObj("/config.json", doc) != 0) {

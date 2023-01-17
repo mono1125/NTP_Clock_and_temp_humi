@@ -75,6 +75,13 @@ extern operation_mode_t getOpeMode();
 */
 extern int getConfig(char *buf, size_t buf_len);
 
+/* 設定パラメタをチェックする
+  引数: 設定値が格納されたJSONDocument
+  戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定パラメタに欠けがないかをチェックする
+*/
+extern int checkConfigParams(JsonDocument &doc);
+
 /* 構造体Configに値をセットする
   引数: 構造体 Config
   責務: 設定ファイルを読みその内容を構造体Configにセットする
