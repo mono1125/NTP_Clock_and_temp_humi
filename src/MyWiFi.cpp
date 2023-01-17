@@ -137,7 +137,7 @@ void scanWiFiAP(char *buf, size_t buf_len) {
     obj["ssid"]    = WiFi.SSID(i).c_str();
     obj["rssi"]    = WiFi.RSSI(i);
     obj["ch"]      = WiFi.channel(i);
-    obj["enc"]     = WiFi.encryptionType(i) == 0 ? 0 : 1;
+    obj["enc"]     = WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? 0 : 1;
     i++;
   }
 
