@@ -23,16 +23,15 @@ static void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, si
     if (myDeserializeJson(doc, (char *)data) != 0) {
       return request->send(500, "application/json", "{\"message\":\"Deserialization Error\"}");
     }
-    if (doc.containsKey("deviceName")) {
-      const char *buf = doc["deviceName"];
-      ESP_LOGI(TAG, "doc[\"deviceName\"]: %s", buf);
-      if (strcmp(DEVICE_NAME, buf) != 0) {
-        ESP_LOGE(TAG, "Error: DEVICE_NAME != deviceName");
-        return request->send(400, "application/json", "{\"message\":\"Device name does not match\"}");
-      }
-      if (writeJsonFile("/config.json", doc) != 0) {
-        return request->send(500, "application/json", "{\"message\":\"Write JSON File Error\"}");
-      }
+    if (checkConfigParams(doc) != 0) {
+      return request->send(400, "application/json", "{\"message\":\"Invalid parameter\"}");
+    }
+    if (strcmp(DEVICE_NAME, doc["deviceName"]) != 0) {
+      ESP_LOGE(TAG, "Error: DEVICE_NAME != deviceName");
+      return request->send(400, "application/json", "{\"message\":\"Device name does not match\"}");
+    }
+    if (writeJsonFile("/config.json", doc) != 0) {
+      return request->send(500, "application/json", "{\"message\":\"Write JSON File Error\"}");
     }
 
     return request->send(201, "application/json", "{\"message\":\"Write config.json Success!\"}");
