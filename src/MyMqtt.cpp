@@ -6,6 +6,7 @@ static char TAG[] = "MyMqtt";
 static void initQueue();
 static void connectMqtt();
 static void pubSubErr(int8_t MQTTErr);
+static void clearMqttData(MQTTData* p, size_t topic_len, size_t data_len);
 static void mqttCallback(char* topic, byte* payload, unsigned int length);
 /* 内部 */
 
@@ -49,11 +50,11 @@ void mqttTask(void* pvParameters) {
         mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data);
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_RESPONSE_PUB_TOPIC) == 0) {
-        mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data);
+        mqttClient.publish(DEVICE_RESPONSE_PUB_TOPIC, mqtt_data.data);
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else {
         ESP_LOGE(TAG, "(publish Error) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
-        mqttClient.publish(mqtt_data.topic, mqtt_data.data);
+        // mqttClient.publish(mqtt_data.topic, mqtt_data.data);
       }
     }
     delay(2000);
@@ -72,33 +73,46 @@ void mqttRevMsgHandleTask(void* pvParameters) {
     if (xQueueReceive(subQueue, &receive_data, 0) == pdPASS) {
       /* get-config */
       if (strcmp(receive_data.topic, "CONF/" THING_NAME "/get-config") == 0) {
-        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
-        memset(response_data.data, '\0', sizeof(response_data.data));  // Important!!
+        clearMqttData(&response_data, sizeof(response_data.topic), sizeof(response_data.data));  // Important!!
+        strncpy(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC, sizeof(response_data.topic) - 1);
         // if (getFile("/config.json", response_data.data, sizeof(response_data.data)) == 0) {
         if (getFile("/new_config.json", response_data.data, sizeof(response_data.data)) == 0) {
+          xQueueSend(pubQueue, &response_data, 0);
+        } else {
+          strncpy(response_data.data, "{\"message\": \"Failed get config file\"}", sizeof(response_data.data) - 1);
           xQueueSend(pubQueue, &response_data, 0);
         }
       }
 
       /* update config */
       if (strcmp(receive_data.topic, "CONF/" THING_NAME "/set-config") == 0) {
-        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
+        clearMqttData(&response_data, sizeof(response_data.topic), sizeof(response_data.data));
+        strncpy(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC, sizeof(response_data.topic) - 1);
         DynamicJsonDocument doc(2048);
         if (myDeserializeJson(doc, receive_data.data) == 0) {
-          if (writeJsonFile("/new_config.json", doc) == 0) {
-            sprintf(response_data.data, "{\"message\": \"config updated!\"}");
-            xQueueSend(pubQueue, &response_data, 0);
+          if (checkConfigParams(doc) == 0) {
+            // if (writeJsonFile("/config.json", doc) == 0) {
+            if (writeJsonFile("/new_config.json", doc) == 0) {
+              strncpy(response_data.data, "{\"message\": \"config updated!\"}", sizeof(response_data.data) - 1);
+            } else {
+              strncpy(response_data.data, "{\"message\": \"Failed config update\"}", sizeof(response_data.data) - 1);
+            }
+          } else {
+            strncpy(response_data.data, "{\"message\": \"Invalid paramater!\"}", sizeof(response_data.data) - 1);
           }
         }
+        xQueueSend(pubQueue, &response_data, 0);
       }
 
       /* reboot */
       if (strcmp(receive_data.topic, "CONF/" THING_NAME "/reboot") == 0) {
-        ESP_LOGI(TAG, "Reboot Topic! will reboot after 2 seconds...");
-        sprintf(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC);
-        sprintf(response_data.data, "{\"message\": \"Receive Reboot Topic! will reboot ...\"}");
+        ESP_LOGI(TAG, "Reboot Topic! will reboot after 3 seconds...");
+        clearMqttData(&response_data, sizeof(response_data.topic), sizeof(response_data.data));
+        strncpy(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC, sizeof(response_data.topic) - 1);
+        strncpy(response_data.data, "{\"message\": \"Receive Reboot Topic! will reboot ...\"}",
+                sizeof(response_data.data) - 1);
         xQueueSend(pubQueue, &response_data, 0);
-        delay(2000);
+        delay(3000);
         ESP.restart();
       }
 
@@ -108,6 +122,11 @@ void mqttRevMsgHandleTask(void* pvParameters) {
     delay(100);
   }
   vTaskDelete(NULL);
+}
+
+static void clearMqttData(MQTTData* p, size_t topic_len, size_t data_len) {
+  memset(p->topic, '\0', topic_len);
+  memset(p->data, '\0', data_len);
 }
 
 static void mqttCallback(char* topic, byte* payload, unsigned int length) {
