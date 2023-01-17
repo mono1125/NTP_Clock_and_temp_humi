@@ -44,6 +44,8 @@ extern void initMqtt(const Config* p);
 extern void mqttTask(void* pvParameters);
 extern void mqttRevMsgHandleTask(void* pvParameters);
 
+/* 内部 */
+
 /* トピックの設定をする
   引数: 構造体 Config
   責務: 設定値をもとにトピックを設定する
@@ -56,7 +58,25 @@ extern void mqttRevMsgHandleTask(void* pvParameters);
 */
 // static void initQueue();
 
+/* MQTT接続してトピックをサブスクライブする
+  引数: なし
+  責務: MQTT接続後にトピックをサブスクライブする
+*/
 // static void connectMqtt();
+
+/* MQTTエラー用関数
+  引数: MQTTErr
+  責務: MQTTエラーが発生したとき、エラーが発生したことをコンソール出力する
+*/
 // static void pubSubErr(int8_t MQTTErr);
+
+/* MQTTコールバック関数
+  引数: トピック
+        データ
+        データ長
+  責務: この関数はサブスクライブしているトピックにメッセージがあったときに呼ばれる
+        受け取ったトピック、メッセージの構造体 (MQTTData)をキューに送る
+*/
 // static void mqttCallback(char* topic, byte* payload, unsigned int length);
+
 #endif
