@@ -23,7 +23,11 @@
 #define CONF_AP_SUBNET "255.255.255.0"
 #endif
 
-extern int myWiFibegin();
+/* FreeRTOSタスク
+  引数: pbParameters (未使用)
+  責務: 定周期でのWi-Fi接続状態監視をして、切れていれば再接続を行う
+*/
+extern void WiFiKeepAliveTask(void *pvParameters);
 
 /* 子機モードでのWi-Fi動作設定
   引数: 構造体 Config
@@ -39,12 +43,6 @@ extern int begin2STAForCONFIG(const Config *p);
   責務: 親機として振る舞う
 */
 extern int begin2AP();
-
-/* FreeRTOSタスク
-  引数: pbParameters (未使用)
-  責務: 定周期でのWi-Fi接続状態監視をして、切れていれば再接続を行う
-*/
-extern void WiFiKeepAliveTask(void *pvParameters);
 
 /* 周囲のWi-Fi APをスキャンしてリストを返す
   引数: 結果を格納する配列 buf
@@ -70,7 +68,7 @@ extern void scanWiFiAP(char *buf, size_t buf_len);
   戻り値: 0 -> 正常, -1 -> 異常
   責務: 文字列のIPアドレスをIPAddress型に変換する
 */
-static int char2IPAddress(IPAddress *ip, const char *data);
+// static int char2IPAddress(IPAddress *ip, const char *data);
 
 /* IPAddress型を文字列に変換する
   IPAddressクラスにはtoStringメソッドがあるためそれを使う

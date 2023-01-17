@@ -4,6 +4,10 @@
 
 static char TAG[] = "MyWiFi";
 
+/* 内部 */
+static int char2IPAddress(IPAddress *ip, const char *data);
+/* 内部 */
+
 void WiFiKeepAliveTask(void *pvParameters) {
   while (1) {
     if (WiFi.status() == WL_CONNECTED) {
