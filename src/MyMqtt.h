@@ -25,6 +25,9 @@
 #define MQTT_PORT 8883
 #endif
 
+/* Queue */
+extern volatile QueueHandle_t pubQueue;
+
 /* MQTT データ構造 */
 typedef struct {
   char topic[50];

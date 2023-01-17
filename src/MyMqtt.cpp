@@ -15,10 +15,10 @@ static char PROD_PUB_TOPIC[50];
 static char DEV_LOG_PUB_TOPIC[50];
 static char CONF_SUB_TOPIC[50];
 
-WiFiClientSecure httpsClient;
-PubSubClient     mqttClient(httpsClient);
-QueueHandle_t    pubQueue = NULL;
-QueueHandle_t    subQueue = NULL;
+WiFiClientSecure              httpsClient;
+PubSubClient                  mqttClient(httpsClient);
+volatile QueueHandle_t        pubQueue = NULL;
+static volatile QueueHandle_t subQueue = NULL;
 
 /*
 参考
