@@ -163,7 +163,11 @@ static void pubHumiAndTemp(float h, float t) {
     return;
   }
   time(&now);
-  strncpy(pub_humi_and_temp.topic, TEST_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
+  if (config.pubProd == 0) {
+    strncpy(pub_humi_and_temp.topic, TEST_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
+  } else {
+    strncpy(pub_humi_and_temp.topic, PROD_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
+  }
   sprintf(pub_humi_and_temp.data,
           "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%.4f,%.4f]}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
