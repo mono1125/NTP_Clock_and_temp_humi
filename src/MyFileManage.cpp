@@ -26,7 +26,7 @@ int getFile(char *path, char *buf, size_t buf_len) {
 }
 
 int getJsonObj(const char *path, JsonDocument &doc) {
-  char buf[2048];  // TODO malloc or nullclear
+  static char buf[2048];
   if (readFile(LittleFS, path, buf, sizeof(buf)) != 0) {
     ESP_LOGE(TAG, "readFile Error");
     return -1;
@@ -38,7 +38,7 @@ int getJsonObj(const char *path, JsonDocument &doc) {
 }
 
 int writeJsonFile(const char *path, JsonDocument &doc) {
-  char buf[2048];  // TODO malloc or nullclear
+  static char buf[2048];
 
   serializeJson(doc, buf);
   if (writeFile(LittleFS, path, buf) != 0) {
@@ -77,7 +77,7 @@ static void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
 }
 
 static void printFile(fs::FS &fs, const char *path) {
-  char buf[1024];  // TODO malloc or null clear
+  static char buf[1024];
   if (fs.exists(path)) {
     readFile(LittleFS, path, buf, sizeof(buf));
     ESP_LOGI(TAG, "READ FILE (%s): %s", path, buf);
