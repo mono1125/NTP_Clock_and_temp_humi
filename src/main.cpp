@@ -9,6 +9,7 @@
 #include "MyWiFi.h"
 #include "esp_log.h"
 #include "esp_sntp.h"
+#include "secrets.h"
 
 static char TAG[] = "main";
 
@@ -113,9 +114,68 @@ void setup() {
   }
 }
 
+static unsigned long getUnixTime() {
+  time_t    now;
+  struct tm _timeInfo;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return 0;
+  }
+  time(&now);
+  return now;
+}
+
+static void pubHeapSize() {
+  static MQTTData pub_heap;
+  struct tm       _timeInfo;
+  time_t          now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  time(&now);
+  strncpy(pub_heap.topic, DEVICE_FREE_HEAP_PUB_TOPIC, sizeof(pub_heap.topic) - 1);
+  sprintf(pub_heap.data, "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%lu]}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, esp_get_free_heap_size());
+  xQueueSend(pubQueue, &pub_heap, 0);
+}
+
+static void pubCpuTemp() {
+  static MQTTData pub_cpu_temp;
+  struct tm       _timeInfo;
+  time_t          now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  time(&now);
+  strncpy(pub_cpu_temp.topic, DEVICE_CPU_TEMP_PUB_TOPIC, sizeof(pub_cpu_temp.topic) - 1);
+  sprintf(pub_cpu_temp.data,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%.2f]}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, temperatureRead());
+  xQueueSend(pubQueue, &pub_cpu_temp, 0);
+}
+
+static void pubHumiAndTemp(float h, float t) {
+  static MQTTData pub_humi_and_temp;
+  struct tm       _timeInfo;
+  time_t          now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  time(&now);
+  strncpy(pub_humi_and_temp.topic, TEST_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
+  sprintf(pub_humi_and_temp.data,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%.4f,%.4f]}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, h, t);
+  xQueueSend(pubQueue, &pub_humi_and_temp, 0);
+}
+
 void loop() {
   ESP_LOGI("loop", "free heap size: %d", esp_get_free_heap_size());
-  delay(10000);
+  pubHeapSize();
+  pubCpuTemp();
+  delay(15000);
 }
 
 void Task0a(void *pvParams) {
@@ -130,6 +190,7 @@ void Task0a(void *pvParams) {
       portEXIT_CRITICAL(&timerMux);
       if (myI2CGetData(&humi, &temp)) {
         ESP_LOGI("SENSOR", "Temp: %f, Humi: %f", temp, humi);
+        pubHumiAndTemp(humi, temp);
       }
     }
     delay(100);
