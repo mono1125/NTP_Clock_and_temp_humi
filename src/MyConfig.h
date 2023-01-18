@@ -37,17 +37,20 @@ typedef enum { RUN, CONF_WIFI_STA, CONF_WIFI_AP } operation_mode_t;
 typedef enum { NOT_SETTING = 0, TCP_ONLY = 1, MQTT_ONLY = 2, TCP_AND_MQTT = 3 } send_mode_t;
 
 /* 設定値用構造体 */
+#define IP_ADDRESS_LEN_MAX (15)
+#define WIFI_SSID_LEN_MAX  (33)
+#define WIFI_PASS_LEN_MAX  (100)
 typedef struct {
-  uint8_t     deviceId;
-  const char *localIPAddress;
-  const char *subnetMask;
-  const char *gatewayAddress;
-  uint8_t     useDhcp;
-  uint8_t     sendMode;
-  const char *targetIPAddress;
-  uint16_t    targetPort;
-  const char *wifiSsid;
-  const char *wifiPass;
+  uint8_t  deviceId;  // 1-99
+  char     localIPAddress[IP_ADDRESS_LEN_MAX];
+  char     subnetMask[IP_ADDRESS_LEN_MAX];
+  char     gatewayAddress[IP_ADDRESS_LEN_MAX];
+  uint8_t  useDhcp;   // 0 or 1
+  uint8_t  sendMode;  // 0 or 1
+  char     targetIPAddress[IP_ADDRESS_LEN_MAX];
+  uint16_t targetPort;
+  char     wifiSsid[WIFI_SSID_LEN_MAX];
+  char     wifiPass[WIFI_PASS_LEN_MAX];
 } Config;
 
 /* オペレーションモード設定用ピン初期化
@@ -74,16 +77,38 @@ extern int getConfig(char *buf, size_t buf_len);
 /* 設定パラメタをチェックする
   引数: 設定値が格納されたJSONDocument
   戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定パラメタをチェックする
+    checkExistsConfigParams関数, checkLengthConfigParams関数, checkRangeConfigParams関数の親関数
+*/
+extern int checkParams(JsonDocument &doc);
+
+/* 設定パラメタをチェックする
+  引数: 設定値が格納されたJSONDocument
+  戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定パラメタのデバイス名の名前の一致を確認する
+*/
+// static int checkNameConfigParams(JsonDocument &doc);
+
+/* 設定パラメタをチェックする
+  引数: 設定値が格納されたJSONDocument
+  戻り値: 0 -> 正常 -1 -> 異常
   責務: 設定パラメタに欠けがないかをチェックする
 */
-extern int checkConfigParams(JsonDocument &doc);
+// static int checkExistsConfigParams(JsonDocument &doc);
 
 /* 設定パラメタの文字数をチェックする
   引数: 設定値が格納されたJSONDocument
   戻り値: 0 -> 正常 -1 -> 異常
   責務: 設定パラメタの文字数をチェックする
 */
-extern int checkLengthConfigParams(JsonDocument &doc);
+// static int checkLengthConfigParams(JsonDocument &doc);
+
+/* 設定パラメタの値の範囲をチェックする
+  引数: 設定値が格納されたJSONDocument
+  戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定パラメタの値の範囲をチェックする
+*/
+// static int checkRangeConfigParams(JsonDocument &doc);
 
 /* 構造体Configに値をセットする
   引数: 構造体 Config

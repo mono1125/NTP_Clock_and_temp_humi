@@ -2,6 +2,13 @@
 
 static const char TAG[] = "MyConfig";
 
+/* 内部 */
+static int checkNameConfigParams(JsonDocument &doc);
+static int checkExistsConfigParams(JsonDocument &doc);
+static int checkLengthConfigParams(JsonDocument &doc);
+static int checkRangeConfigParams(JsonDocument &doc);
+/* 内部 */
+
 void initOpeModePin() {
   pinMode(CONF_PIN, INPUT_PULLUP);
   pinMode(CONF_AP_MODE_PIN, INPUT_PULLUP);
@@ -27,7 +34,94 @@ int getConfig(char *buf, size_t buf_len) {
   return 0;
 }
 
-int checkConfigParams(JsonDocument &doc) {
+int checkParams(JsonDocument &doc) {
+  if (checkNameConfigParams(doc) != 0) {
+    return -1;
+  }
+  if (checkExistsConfigParams(doc) != 0) {
+    return -2;
+  }
+  if (checkLengthConfigParams(doc) != 0) {
+    return -3;
+  }
+  if (checkRangeConfigParams(doc) != 0) {
+    return -4;
+  }
+  return 0;
+}
+
+void setConfig(Config *p) {
+  DynamicJsonDocument doc(2048);
+  if (getJsonObj("/config.json", doc) != 0) {
+    if (getJsonObj("/default_config.json", doc) != 0) {
+      ESP_LOGE(TAG, "設定ファイルエラー");
+      return;
+    }
+  }
+  const char *device_name = doc["deviceName"];
+  if (strcmp(DEVICE_NAME, device_name) != 0) {
+    ESP_LOGE(TAG, "DEVICE_NAMEと設定値のdeviceNameが一致しません");
+    if (getJsonObj("/default_config.json", doc) != 0) {
+      ESP_LOGE(TAG, "設定ファイルエラー");
+      return;
+    }
+  }
+
+  p->deviceId = doc["deviceId"];
+  strncpy(p->localIPAddress, doc["localIPAddress"], IP_ADDRESS_LEN_MAX);
+  strncpy(p->subnetMask, doc["subnetMask"], IP_ADDRESS_LEN_MAX);
+  strncpy(p->gatewayAddress, doc["gatewayAddress"], IP_ADDRESS_LEN_MAX);
+  p->useDhcp  = doc["useDhcp"];
+  p->sendMode = doc["sendMode"];
+  strncpy(p->targetIPAddress, doc["targetIPAddress"], IP_ADDRESS_LEN_MAX);
+  p->targetPort = doc["targetPort"];
+  strncpy(p->wifiSsid, doc["wifiSsid"], WIFI_SSID_LEN_MAX);
+  strncpy(p->wifiPass, doc["wifiPass"], WIFI_PASS_LEN_MAX);
+}
+
+void printConfig(const Config *p) {
+  ESP_LOGI(TAG, "(Config) deviceId: %d", p->deviceId);
+  ESP_LOGI(TAG, "(Config) localIPAddress: %s", p->localIPAddress);
+  ESP_LOGI(TAG, "(Config) subnetMask: %s", p->subnetMask);
+  ESP_LOGI(TAG, "(Config) gatewayAddress: %s", p->gatewayAddress);
+  ESP_LOGI(TAG, "(Config) useDhcp: %d", p->useDhcp);
+  ESP_LOGI(TAG, "(Config) sendMode: %d", p->sendMode);
+  ESP_LOGI(TAG, "(Config) targetIPAddress: %s", p->targetIPAddress);
+  ESP_LOGI(TAG, "(Config) targetPort: %d", p->targetPort);
+  ESP_LOGI(TAG, "(Config  wifiSsid: %s", p->wifiSsid);
+  ESP_LOGI(TAG, "(Config  wifiPass: %s", p->wifiPass);
+}
+
+send_mode_t getSendMode(const Config *p) {
+  uint8_t mode = p->sendMode;
+  if (mode == 0) {
+    return NOT_SETTING;
+  } else if (mode == 1) {
+    return TCP_ONLY;
+  } else if (mode == 2) {
+    return MQTT_ONLY;
+  } else if (mode == 3) {
+    return TCP_AND_MQTT;
+  } else {
+    return NOT_SETTING;
+  }
+}
+
+int isEmptyChar(const char *buf) {
+  if ((buf == NULL) || (strlen(buf) == 0)) {
+    return 0;
+  }
+  return -1;
+}
+
+static int checkNameConfigParams(JsonDocument &doc) {
+  if (strcmp(DEVICE_NAME, doc["deviceName"]) != 0) {
+    return -1;
+  }
+  return 0;
+}
+
+static int checkExistsConfigParams(JsonDocument &doc) {
   ESP_LOGI(TAG, "Start check config params...");
   if (!doc.containsKey("deviceName")) {
     ESP_LOGE(TAG, "Not Exists Key: deviceName");
@@ -73,7 +167,7 @@ int checkConfigParams(JsonDocument &doc) {
   return 0;
 }
 
-int checkLengthConfigParams(JsonDocument &doc) {
+static int checkLengthConfigParams(JsonDocument &doc) {
   uint16_t len_deviceId        = strlen(doc["deviceId"]);
   uint16_t len_localIPAddress  = strlen(doc["localIPAddress"]);
   uint16_t len_subnetMask      = strlen(doc["subnetMask"]);
@@ -88,13 +182,13 @@ int checkLengthConfigParams(JsonDocument &doc) {
   if (len_deviceId == 0 || len_deviceId > 2) {
     return -1;
   }
-  if (len_localIPAddress > 15) {
+  if (len_localIPAddress > IP_ADDRESS_LEN_MAX) {
     return -1;
   }
-  if (len_subnetMask > 15) {
+  if (len_subnetMask > IP_ADDRESS_LEN_MAX) {
     return -1;
   }
-  if (len_gatewayAddress > 15) {
+  if (len_gatewayAddress > IP_ADDRESS_LEN_MAX) {
     return -1;
   }
   if (len_useDhcp != 1) {
@@ -103,93 +197,37 @@ int checkLengthConfigParams(JsonDocument &doc) {
   if (len_sendMode != 1) {
     return -1;
   }
-  if (len_targetIPAddress > 15) {
+  if (len_targetIPAddress > IP_ADDRESS_LEN_MAX) {
     return -1;
   }
   if (len_targetPort > 5) {
     return -1;
   }
-  if (len_wifiSsid > 33) {
+  if (len_wifiSsid > WIFI_SSID_LEN_MAX) {
     return -1;
   }
-  if (len_wifiPass > 100) {
+  if (len_wifiPass > WIFI_PASS_LEN_MAX) {
     return -1;
   }
-
-  ESP_LOGI(TAG, "len deviceId: %d", len_deviceId);
-  ESP_LOGI(TAG, "len localIPAddress: %d", len_localIPAddress);
-  ESP_LOGI(TAG, "len subnetMask: %d", len_subnetMask);
-  ESP_LOGI(TAG, "len gatewayAddress: %d", len_gatewayAddress);
-  ESP_LOGI(TAG, "len useDhcp: %d", len_useDhcp);
-  ESP_LOGI(TAG, "len sendMode: %d", len_sendMode);
-  ESP_LOGI(TAG, "len targetIPAddress: %d", len_targetIPAddress);
-  ESP_LOGI(TAG, "len targetPort: %d", len_targetPort);
-  ESP_LOGI(TAG, "len wifiSsid: %d", len_wifiSsid);
-  ESP_LOGI(TAG, "len wifiPass: %d", len_wifiPass);
-
   return 0;
 }
 
-void setConfig(Config *p) {
-  DynamicJsonDocument doc(2048);
-  if (getJsonObj("/config.json", doc) != 0) {
-    if (getJsonObj("/default_config.json", doc) != 0) {
-      ESP_LOGE(TAG, "設定ファイルエラー");
-      return;
-    }
+static int checkRangeConfigParams(JsonDocument &doc) {
+  int val_deviceId   = doc["deviceId"];
+  int val_useDhcp    = doc["useDhcp"];
+  int val_sendMode   = doc["sendMode"];
+  int val_targetPort = doc["targetPort"];
+  if (val_deviceId < 1 || val_deviceId > 99) {
+    return -1;
   }
-  const char *device_name = doc["deviceName"];
-  if (strcmp(DEVICE_NAME, device_name) != 0) {
-    ESP_LOGE(TAG, "DEVICE_NAMEと設定値のdeviceNameが一致しません");
-    if (getJsonObj("/default_config.json", doc) != 0) {
-      ESP_LOGE(TAG, "設定ファイルエラー");
-      return;
-    }
+  if (val_useDhcp < 0 || val_useDhcp > 1) {
+    return -1;
   }
-
-  p->deviceId        = doc["deviceId"];
-  p->localIPAddress  = doc["localIPAddress"];
-  p->subnetMask      = doc["subnetMask"];
-  p->gatewayAddress  = doc["gatewayAddress"];
-  p->useDhcp         = doc["useDhcp"];
-  p->sendMode        = doc["sendMode"];
-  p->targetIPAddress = doc["targetIPAddress"];
-  p->targetPort      = doc["targetPort"];
-  p->wifiSsid        = doc["wifiSsid"];
-  p->wifiPass        = doc["wifiPass"];
-}
-
-void printConfig(const Config *p) {
-  ESP_LOGI(TAG, "(Config) deviceId: %d", p->deviceId);
-  ESP_LOGI(TAG, "(Config) localIPAddress: %s", p->localIPAddress);
-  ESP_LOGI(TAG, "(Config) subnetMask: %s", p->subnetMask);
-  ESP_LOGI(TAG, "(Config) gatewayAddress: %s", p->gatewayAddress);
-  ESP_LOGI(TAG, "(Config) useDhcp: %d", p->useDhcp);
-  ESP_LOGI(TAG, "(Config) sendMode: %d", p->sendMode);
-  ESP_LOGI(TAG, "(Config) targetIPAddress: %s", p->targetIPAddress);
-  ESP_LOGI(TAG, "(Config) targetPort: %d", p->targetPort);
-  ESP_LOGI(TAG, "(Config  wifiSsid: %s", p->wifiSsid);
-  ESP_LOGI(TAG, "(Config  wifiPass: %s", p->wifiPass);
-}
-
-send_mode_t getSendMode(const Config *p) {
-  uint8_t mode = p->sendMode;
-  if (mode == 0) {
-    return NOT_SETTING;
-  } else if (mode == 1) {
-    return TCP_ONLY;
-  } else if (mode == 2) {
-    return MQTT_ONLY;
-  } else if (mode == 3) {
-    return TCP_AND_MQTT;
-  } else {
-    return NOT_SETTING;
+  if (val_sendMode < 1 || val_sendMode > 3) {
+    return -1;
   }
-}
-
-int isEmptyChar(const char *buf) {
-  if ((buf == NULL) || (strlen(buf) == 0)) {
-    return 0;
+  if (val_targetPort < 1 || val_targetPort > 65535) {
+    return -1;
   }
-  return -1;
+  return 0;
 }
