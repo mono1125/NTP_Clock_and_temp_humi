@@ -48,10 +48,6 @@ typedef struct {
   uint16_t    targetPort;
   const char *wifiSsid;
   const char *wifiPass;
-  const char *testPubTopic;
-  const char *prodPubTopic;
-  const char *devLogPubTopic;
-  const char *confSubTopic;
 } Config;
 
 /* オペレーションモード設定用ピン初期化
