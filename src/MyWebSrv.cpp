@@ -23,13 +23,30 @@ static void onBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, si
     if (myDeserializeJson(doc, (char *)data) != 0) {
       return request->send(500, "application/json", "{\"message\":\"Deserialization Error\"}");
     }
-    if (checkConfigParams(doc) != 0) {
-      return request->send(400, "application/json", "{\"message\":\"Invalid parameter\"}");
+    switch (checkParams(doc)) {
+      case 0:
+        break;
+      case -1:
+        return request->send(400, "application/json",
+                             "{\"message\": \"Invalid paramater! Error: check name config params\"}");
+        break;
+      case -2:
+        return request->send(400, "application/json",
+                             "{\"message\": \"Invalid paramater! Error: check exists config params\"}");
+        break;
+      case -3:
+        return request->send(400, "application/json",
+                             "{\"message\": \"Invalid paramater! Error: check length config params\"}");
+        break;
+      case -4:
+        return request->send(400, "application/json",
+                             "{\"message\": \"Invalid paramater! Error: check range config params\"}");
+        break;
+      default:
+        ESP_LOGE(TAG, "UNKNOWN ERROR");
+        break;
     }
-    if (strcmp(DEVICE_NAME, doc["deviceName"]) != 0) {
-      ESP_LOGE(TAG, "Error: DEVICE_NAME != deviceName");
-      return request->send(400, "application/json", "{\"message\":\"Device name does not match\"}");
-    }
+
     if (writeJsonFile("/config.json", doc) != 0) {
       return request->send(500, "application/json", "{\"message\":\"Write JSON File Error\"}");
     }
