@@ -201,7 +201,7 @@ void Task0a(void *pvParams) {
 void Task1a(void *pvParams) {
   timer2 = timerBegin(1, getApbFrequency() / 1000000, true);  // 1us
   timerAttachInterrupt(timer2, &onTimer2, true);
-  timerAlarmWrite(timer2, 800, true);
+  timerAlarmWrite(timer2, 600, true);
   timerAlarmEnable(timer2);
   while (true) {
     if (timeCounter2 > 0) {
