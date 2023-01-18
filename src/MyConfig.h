@@ -78,6 +78,13 @@ extern int getConfig(char *buf, size_t buf_len);
 */
 extern int checkConfigParams(JsonDocument &doc);
 
+/* 設定パラメタの文字数をチェックする
+  引数: 設定値が格納されたJSONDocument
+  戻り値: 0 -> 正常 -1 -> 異常
+  責務: 設定パラメタの文字数をチェックする
+*/
+extern int checkLengthConfigParams(JsonDocument &doc);
+
 /* 構造体Configに値をセットする
   引数: 構造体 Config
   責務: 設定ファイルを読みその内容を構造体Configにセットする

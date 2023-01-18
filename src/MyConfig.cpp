@@ -73,6 +73,63 @@ int checkConfigParams(JsonDocument &doc) {
   return 0;
 }
 
+int checkLengthConfigParams(JsonDocument &doc) {
+  uint16_t len_deviceId        = strlen(doc["deviceId"]);
+  uint16_t len_localIPAddress  = strlen(doc["localIPAddress"]);
+  uint16_t len_subnetMask      = strlen(doc["subnetMask"]);
+  uint16_t len_gatewayAddress  = strlen(doc["gatewayAddress"]);
+  uint16_t len_useDhcp         = strlen(doc["useDhcp"]);
+  uint16_t len_sendMode        = strlen(doc["sendMode"]);
+  uint16_t len_targetIPAddress = strlen(doc["targetIPAddress"]);
+  uint16_t len_targetPort      = strlen(doc["targetPort"]);
+  uint16_t len_wifiSsid        = strlen(doc["wifiSsid"]);
+  uint16_t len_wifiPass        = strlen(doc["wifiPass"]);
+
+  if (len_deviceId == 0 || len_deviceId > 2) {
+    return -1;
+  }
+  if (len_localIPAddress > 15) {
+    return -1;
+  }
+  if (len_subnetMask > 15) {
+    return -1;
+  }
+  if (len_gatewayAddress > 15) {
+    return -1;
+  }
+  if (len_useDhcp != 1) {
+    return -1;
+  }
+  if (len_sendMode != 1) {
+    return -1;
+  }
+  if (len_targetIPAddress > 15) {
+    return -1;
+  }
+  if (len_targetPort > 5) {
+    return -1;
+  }
+  if (len_wifiSsid > 33) {
+    return -1;
+  }
+  if (len_wifiPass > 100) {
+    return -1;
+  }
+
+  ESP_LOGI(TAG, "len deviceId: %d", len_deviceId);
+  ESP_LOGI(TAG, "len localIPAddress: %d", len_localIPAddress);
+  ESP_LOGI(TAG, "len subnetMask: %d", len_subnetMask);
+  ESP_LOGI(TAG, "len gatewayAddress: %d", len_gatewayAddress);
+  ESP_LOGI(TAG, "len useDhcp: %d", len_useDhcp);
+  ESP_LOGI(TAG, "len sendMode: %d", len_sendMode);
+  ESP_LOGI(TAG, "len targetIPAddress: %d", len_targetIPAddress);
+  ESP_LOGI(TAG, "len targetPort: %d", len_targetPort);
+  ESP_LOGI(TAG, "len wifiSsid: %d", len_wifiSsid);
+  ESP_LOGI(TAG, "len wifiPass: %d", len_wifiPass);
+
+  return 0;
+}
+
 void setConfig(Config *p) {
   DynamicJsonDocument doc(2048);
   if (getJsonObj("/config.json", doc) != 0) {
