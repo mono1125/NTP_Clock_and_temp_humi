@@ -6,6 +6,7 @@
     "gatewayAddress": "",
     "useDhcp": "0",
     "sendMode": "0",
+    "pubProd": "0",
     "targetIPAddress": "",
     "targetPort": "50000",
     "wifiSsid": "testssid",

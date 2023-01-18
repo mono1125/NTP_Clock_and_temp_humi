@@ -73,6 +73,7 @@ void setConfig(Config *p) {
   strncpy(p->gatewayAddress, doc["gatewayAddress"], IP_ADDRESS_LEN_MAX);
   p->useDhcp  = doc["useDhcp"];
   p->sendMode = doc["sendMode"];
+  p->pubProd  = doc["pubProd"];
   strncpy(p->targetIPAddress, doc["targetIPAddress"], IP_ADDRESS_LEN_MAX);
   p->targetPort = doc["targetPort"];
   strncpy(p->wifiSsid, doc["wifiSsid"], WIFI_SSID_LEN_MAX);
@@ -86,6 +87,7 @@ void printConfig(const Config *p) {
   ESP_LOGI(TAG, "(Config) gatewayAddress: %s", p->gatewayAddress);
   ESP_LOGI(TAG, "(Config) useDhcp: %d", p->useDhcp);
   ESP_LOGI(TAG, "(Config) sendMode: %d", p->sendMode);
+  ESP_LOGI(TAG, "(Config) pubProd: %d", p->pubProd);
   ESP_LOGI(TAG, "(Config) targetIPAddress: %s", p->targetIPAddress);
   ESP_LOGI(TAG, "(Config) targetPort: %d", p->targetPort);
   ESP_LOGI(TAG, "(Config  wifiSsid: %s", p->wifiSsid);
@@ -147,6 +149,10 @@ static int checkExistsConfigParams(JsonDocument &doc) {
     ESP_LOGE(TAG, "Not Exists Key: sendMode");
     return -1;
   }
+  if (!doc.containsKey("pubProd")) {
+    ESP_LOGE(TAG, "Not Exists Key: pubProd");
+    return -1;
+  }
   if (!doc.containsKey("targetIPAddress")) {
     ESP_LOGE(TAG, "Not Exists Key: targetIPAddress");
     return -1;
@@ -174,6 +180,7 @@ static int checkLengthConfigParams(JsonDocument &doc) {
   uint16_t len_gatewayAddress  = strlen(doc["gatewayAddress"]);
   uint16_t len_useDhcp         = strlen(doc["useDhcp"]);
   uint16_t len_sendMode        = strlen(doc["sendMode"]);
+  uint16_t len_pubProd         = strlen(doc["pubProd"]);
   uint16_t len_targetIPAddress = strlen(doc["targetIPAddress"]);
   uint16_t len_targetPort      = strlen(doc["targetPort"]);
   uint16_t len_wifiSsid        = strlen(doc["wifiSsid"]);
@@ -197,6 +204,9 @@ static int checkLengthConfigParams(JsonDocument &doc) {
   if (len_sendMode != 1) {
     return -1;
   }
+  if (len_pubProd != 1) {
+    return -1;
+  }
   if (len_targetIPAddress > IP_ADDRESS_LEN_MAX) {
     return -1;
   }
@@ -216,6 +226,7 @@ static int checkRangeConfigParams(JsonDocument &doc) {
   int val_deviceId   = doc["deviceId"];
   int val_useDhcp    = doc["useDhcp"];
   int val_sendMode   = doc["sendMode"];
+  int val_pubProd    = doc["pubProd"];
   int val_targetPort = doc["targetPort"];
   if (val_deviceId < 1 || val_deviceId > 99) {
     return -1;
@@ -224,6 +235,9 @@ static int checkRangeConfigParams(JsonDocument &doc) {
     return -1;
   }
   if (val_sendMode < 1 || val_sendMode > 3) {
+    return -1;
+  }
+  if (val_pubProd < 0 || val_pubProd > 1) {
     return -1;
   }
   if (val_targetPort < 1 || val_targetPort > 65535) {

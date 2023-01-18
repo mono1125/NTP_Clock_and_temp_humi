@@ -47,6 +47,7 @@ typedef struct {
   char     gatewayAddress[IP_ADDRESS_LEN_MAX];
   uint8_t  useDhcp;   // 0 or 1
   uint8_t  sendMode;  // 0 or 1
+  uint8_t  pubProd;   // 0 or 1
   char     targetIPAddress[IP_ADDRESS_LEN_MAX];
   uint16_t targetPort;
   char     wifiSsid[WIFI_SSID_LEN_MAX];
