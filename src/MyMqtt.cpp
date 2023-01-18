@@ -90,15 +90,34 @@ void mqttRevMsgHandleTask(void* pvParameters) {
         strncpy(response_data.topic, DEVICE_RESPONSE_PUB_TOPIC, sizeof(response_data.topic) - 1);
         DynamicJsonDocument doc(2048);
         if (myDeserializeJson(doc, receive_data.data) == 0) {
-          if (checkConfigParams(doc) == 0) {
-            // if (writeJsonFile("/config.json", doc) == 0) {
-            if (writeJsonFile("/new_config.json", doc) == 0) {
+          switch (checkParams(doc)) {
+            case 0:
+              // if (writeJsonFile("/config.json", doc) != 0) {
+              if (writeJsonFile("/new_config.json", doc) != 0) {
+                strncpy(response_data.data, "{\"message\": \"Failed config update\"}", sizeof(response_data.data) - 1);
+                break;
+              }
               strncpy(response_data.data, "{\"message\": \"config updated!\"}", sizeof(response_data.data) - 1);
-            } else {
-              strncpy(response_data.data, "{\"message\": \"Failed config update\"}", sizeof(response_data.data) - 1);
-            }
-          } else {
-            strncpy(response_data.data, "{\"message\": \"Invalid paramater!\"}", sizeof(response_data.data) - 1);
+              break;
+            case -1:
+              strncpy(response_data.data, "{\"message\": \"Invalid paramater! Error: check name config params\"}",
+                      sizeof(response_data.data) - 1);
+              break;
+            case -2:
+              strncpy(response_data.data, "{\"message\": \"Invalid paramater! Error: check exists config params\"}",
+                      sizeof(response_data.data) - 1);
+              break;
+            case -3:
+              strncpy(response_data.data, "{\"message\": \"Invalid paramater! Error: check length config params\"}",
+                      sizeof(response_data.data) - 1);
+              break;
+            case -4:
+              strncpy(response_data.data, "{\"message\": \"Invalid paramater! Error: check range config params\"}",
+                      sizeof(response_data.data) - 1);
+              break;
+            default:
+              ESP_LOGE(TAG, "UNKNOWN ERROR");
+              break;
           }
         }
         xQueueSend(pubQueue, &response_data, 0);
