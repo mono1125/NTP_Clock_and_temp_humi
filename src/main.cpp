@@ -123,10 +123,11 @@ static void pubHeapSize() {
   }
   unsigned long long unixTime = time(&now);
   strncpy(pub_heap.topic, DEVICE_FREE_HEAP_PUB_TOPIC, sizeof(pub_heap.topic) - 1);
-  sprintf(pub_heap.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
-          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
+  sprintf(
+      pub_heap.data,
+      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
+      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
+      (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
   xQueueSend(pubQueue, &pub_heap, 0);
 }
 
@@ -139,10 +140,11 @@ static void pubCpuTemp() {
   }
   unsigned long long unixTime = time(&now);
   strncpy(pub_cpu_temp.topic, DEVICE_CPU_TEMP_PUB_TOPIC, sizeof(pub_cpu_temp.topic) - 1);
-  sprintf(pub_cpu_temp.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
-          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
+  sprintf(
+      pub_cpu_temp.data,
+      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
+      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
+      (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
   xQueueSend(pubQueue, &pub_cpu_temp, 0);
 }
 
@@ -160,7 +162,7 @@ static void pubHumiAndTemp(float h, float t) {
     strncpy(pub_humi_and_temp.topic, PROD_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
   }
   sprintf(pub_humi_and_temp.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
           "\"temp\":%.2f}}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
           (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, h, t);
