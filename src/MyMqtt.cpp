@@ -18,6 +18,10 @@ static volatile QueueHandle_t subQueue = NULL;
 /*
 参考
 https://github.com/debsahu/ESP-MQTT-AWS-IoT-Core/blob/master/Arduino/PubSubClient/PubSubClient.ino
+
+IoT Core KeepAlive時間
+https://blog.denet.co.jp/aws-iot-monitoring-temperature/
+https://docs.aws.amazon.com/ja_jp/general/latest/gr/iot-core.html
 */
 
 void initMqtt(const Config* p) {
@@ -27,6 +31,8 @@ void initMqtt(const Config* p) {
   mqttClient.setServer(MQTT_ENDPOINT, MQTT_PORT);
   mqttClient.setBufferSize(2048);
   mqttClient.setCallback(mqttCallback);
+  mqttClient.setKeepAlive(1200);
+  mqttClient.setSocketTimeout(1200);
   connectMqtt();
   initQueue();
   ESP_LOGI(TAG, "Buffer Size: %d", mqttClient.getBufferSize());
