@@ -35,7 +35,9 @@ void initMqtt(const Config* p) {
 void mqttTask(void* pvParameters) {
   static MQTTData mqtt_data;
   while (1) {
-    mqttClient.loop();
+    if (!mqttClient.loop()) {
+      mqttClient.connect(THING_NAME);
+    }
     if (xQueueReceive(pubQueue, &mqtt_data, 0) == pdPASS) {
       if (strcmp(mqtt_data.topic, TEST_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(TEST_PUB_TOPIC, mqtt_data.data)) {
