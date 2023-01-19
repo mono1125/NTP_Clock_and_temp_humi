@@ -10,11 +10,6 @@
 #include "esp_log.h"
 #include "secrets.h"
 
-#ifdef MQTT_MAX_PACKET_SIZE
-#undef MQTT_MAX_PACKET_SIZE
-#define MQTT_MAX_PACKET_SIZE 1024
-#endif
-
 #ifndef THING_NAME
 #define THING_NAME "your thing name"
 #endif
