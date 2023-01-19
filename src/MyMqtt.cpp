@@ -38,19 +38,29 @@ void mqttTask(void* pvParameters) {
     mqttClient.loop();
     if (xQueueReceive(pubQueue, &mqtt_data, 0) == pdPASS) {
       if (strcmp(mqtt_data.topic, TEST_PUB_TOPIC) == 0) {
-        mqttClient.publish(TEST_PUB_TOPIC, mqtt_data.data);
+        if (!mqttClient.publish(TEST_PUB_TOPIC, mqtt_data.data)) {
+          ESP_LOGE(TAG, "publish error");
+        }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, PROD_PUB_TOPIC) == 0) {
-        mqttClient.publish(PROD_PUB_TOPIC, mqtt_data.data);
+        if (!mqttClient.publish(PROD_PUB_TOPIC, mqtt_data.data)) {
+          ESP_LOGE(TAG, "publish error");
+        }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_CPU_TEMP_PUB_TOPIC) == 0) {
-        mqttClient.publish(DEVICE_CPU_TEMP_PUB_TOPIC, mqtt_data.data);
+        if (!mqttClient.publish(DEVICE_CPU_TEMP_PUB_TOPIC, mqtt_data.data)) {
+          ESP_LOGE(TAG, "publish error");
+        }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_FREE_HEAP_PUB_TOPIC) == 0) {
-        mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data);
+        if (!mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data)) {
+          ESP_LOGE(TAG, "publish error");
+        }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_RESPONSE_PUB_TOPIC) == 0) {
-        mqttClient.publish(DEVICE_RESPONSE_PUB_TOPIC, mqtt_data.data);
+        if (!mqttClient.publish(DEVICE_RESPONSE_PUB_TOPIC, mqtt_data.data)) {
+          ESP_LOGE(TAG, "publish error");
+        }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else {
         ESP_LOGE(TAG, "(publish Error) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
