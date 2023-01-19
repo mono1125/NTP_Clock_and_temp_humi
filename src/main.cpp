@@ -114,16 +114,6 @@ void setup() {
   }
 }
 
-static unsigned long getUnixTime() {
-  time_t    now;
-  struct tm _timeInfo;
-  if (!getLocalTime(&_timeInfo, 5000)) {
-    return 0;
-  }
-  time(&now);
-  return now;
-}
-
 static void pubHeapSize() {
   static MQTTData pub_heap;
   struct tm       _timeInfo;
@@ -131,11 +121,12 @@ static void pubHeapSize() {
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  time(&now);
+  unsigned long long unixTime = time(&now);
   strncpy(pub_heap.topic, DEVICE_FREE_HEAP_PUB_TOPIC, sizeof(pub_heap.topic) - 1);
-  sprintf(pub_heap.data, "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%lu]}",
+  sprintf(pub_heap.data,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, esp_get_free_heap_size());
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
   xQueueSend(pubQueue, &pub_heap, 0);
 }
 
@@ -146,12 +137,12 @@ static void pubCpuTemp() {
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  time(&now);
+  unsigned long long unixTime = time(&now);
   strncpy(pub_cpu_temp.topic, DEVICE_CPU_TEMP_PUB_TOPIC, sizeof(pub_cpu_temp.topic) - 1);
   sprintf(pub_cpu_temp.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%.2f]}",
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, temperatureRead());
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
   xQueueSend(pubQueue, &pub_cpu_temp, 0);
 }
 
@@ -162,16 +153,17 @@ static void pubHumiAndTemp(float h, float t) {
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  time(&now);
+  unsigned long long unixTime = time(&now);
   if (config.pubProd == 0) {
     strncpy(pub_humi_and_temp.topic, TEST_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
   } else {
     strncpy(pub_humi_and_temp.topic, PROD_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
   }
   sprintf(pub_humi_and_temp.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"val\": [%.4f,%.4f]}",
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
+          "\"temp\":%.2f}}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), now, h, t);
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, h, t);
   xQueueSend(pubQueue, &pub_humi_and_temp, 0);
 }
 
