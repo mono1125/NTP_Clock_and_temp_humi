@@ -66,6 +66,7 @@ Flash: [========  ]  77.2% (used 1012353 bytes from 1310720 bytes)
 #include "MyLed.h"
 #include "MyMqtt.h"
 #include "MyNTP.h"
+#include "MyTCP.h"
 #include "MyWebSrv.h"
 #include "MyWiFi.h"
 #include "esp_log.h"
@@ -108,48 +109,61 @@ struct tm timeInfo;
 Config    config;
 
 static void runMode(Config *config) {
-  if (begin2STAForRUN(config) == 0) {
-    beginNtp(60000);
-    initMqtt(config);
-    myWebSrv();
-
-    xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
-  } else {
+  if (begin2STAForRUN(config) != 0) {
     ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
     delay(3000);
     ESP.restart();
   }
 
+  beginNtp(60000);
+  myWebSrv();
+  xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
   initLedDisplay();
   myI2Cbegin();
-
   xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
 
+  switch (getSendMode(config)) {
+    case TCP_ONLY:
+      initTCPQueue();
+      xTaskCreatePinnedToCore(TCPTask, "TCP Send Task", 4096, NULL, 2, NULL, 0);
+      break;
+    case MQTT_ONLY:
+      initMqtt(config);
+      xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
+      xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
+      break;
+    case TCP_AND_MQTT:
+      initTCPQueue();
+      initMqtt(config);
+      xTaskCreatePinnedToCore(TCPTask, "TCP Send Task", 4096, NULL, 2, NULL, 0);
+      xTaskCreatePinnedToCore(mqttTask, "mqttTask", 8196, NULL, 1, NULL, 0);
+      xTaskCreatePinnedToCore(mqttRevMsgHandleTask, "mqttRevMsgHandleTask", 4096, NULL, 2, NULL, 0);
+    default:
+      ESP_LOGE(TAG, "Send Mode Error");
+      delay(3000);
+      break;
+  }
   ESP_LOGI(TAG, "RUN MODE START");
 }
 
 static void confSTAMode(Config *config) {
-  if (begin2STAForCONFIG(config) == 0) {
-    myWebSrv();
-    xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
-  } else {
+  if (begin2STAForCONFIG(config) != 0) {
     ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
     delay(3000);
     ESP.restart();
   }
+  myWebSrv();
+  xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
 }
 
 static void confAPMode() {
-  if (begin2AP() == 0) {
-    myWebSrv();
-  } else {
+  if (begin2AP() != 0) {
     ESP_LOGE(TAG, "Wi-Fi ERROR. will restart...");
     delay(3000);
     ESP.restart();
   }
+  myWebSrv();
 }
 
 void setup() {
@@ -230,10 +244,76 @@ static void pubHumiAndTemp(float h, float t) {
   xQueueSend(pubQueue, &pub_humi_and_temp, 0);
 }
 
+static void tcpHeapSize() {
+  static char buf[TCP_MSG_SIZE];
+  struct tm   _timeInfo;
+  time_t      now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  unsigned long long unixTime = time(&now);
+  sprintf(
+      buf,
+      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
+      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
+      (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
+  xQueueSend(tcpQueue, buf, 0);
+}
+
+static void tcpCpuTemp() {
+  static char buf[TCP_MSG_SIZE];
+  struct tm   _timeInfo;
+  time_t      now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  unsigned long long unixTime = time(&now);
+  sprintf(
+      buf,
+      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
+      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
+      (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
+  xQueueSend(tcpQueue, buf, 0);
+}
+
+static void tcpHumiAndTemp(float h, float t) {
+  static char buf[TCP_MSG_SIZE];
+  struct tm   _timeInfo;
+  time_t      now;
+  if (!getLocalTime(&_timeInfo, 5000)) {
+    return;
+  }
+  unsigned long long unixTime = time(&now);
+  sprintf(buf,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
+          "\"temp\":%.2f}}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, h, t);
+  xQueueSend(tcpQueue, buf, 0);
+}
+
 void loop() {
   ESP_LOGI("loop", "free heap size: %d", esp_get_free_heap_size());
-  pubHeapSize();
-  pubCpuTemp();
+  switch (getSendMode(&config)) {
+    case TCP_ONLY:
+      tcpHeapSize();
+      tcpCpuTemp();
+      tcpHumiAndTemp(humi, temp);
+      break;
+    case MQTT_ONLY:
+      pubHeapSize();
+      pubCpuTemp();
+      pubHumiAndTemp(humi, temp);
+      break;
+    case TCP_AND_MQTT:
+      pubHeapSize();
+      pubCpuTemp();
+      pubHumiAndTemp(humi, temp);
+      tcpHumiAndTemp(humi, temp);
+      break;
+    default:
+      break;
+  }
   delay(15000);
 }
 
@@ -249,7 +329,6 @@ void Task0a(void *pvParams) {
       portEXIT_CRITICAL(&timerMux);
       if (myI2CGetData(&humi, &temp)) {
         ESP_LOGI("SENSOR", "Temp: %f, Humi: %f", temp, humi);
-        pubHumiAndTemp(humi, temp);
       }
     }
     delay(100);
