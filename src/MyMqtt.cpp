@@ -85,7 +85,7 @@ void mqttTask(void* pvParameters) {
 */
 void mqttRevMsgHandleTask(void* pvParameters) {
   static MQTTData receive_data;
-  MQTTData        response_data;
+  static MQTTData response_data;
 
   while (1) {
     if (xQueueReceive(subQueue, &receive_data, 0) == pdPASS) {
