@@ -12,6 +12,9 @@
 // #define CONF_PIN         9
 // #define CONF_AP_MODE_PIN 10
 
+// ESP32-DEV
+// #define CONF_PIN         2
+// #define CONF_AP_MODE_PIN 4
 /* GPIO PIN for Config mode */
 
 #define DEVICE_NAME "ESP32"

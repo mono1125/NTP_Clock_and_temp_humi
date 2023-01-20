@@ -29,6 +29,36 @@ RAM:   [==        ]  16.2% (used 52964 bytes from 327680 bytes)
 Flash: [===       ]  28.8% (used 962173 bytes from 3342336 bytes)
 */
 
+/* Dependency Info (ESP32-DEVKITC)
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (5.2.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+PACKAGES:
+ - framework-arduinoespressif32 @ 3.20005.220925 (2.0.5)
+ - tool-esptoolpy @ 1.40201.0 (4.2.1)
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch3
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ deep, Compatibility ~ soft
+
+Dependency Graph
+|-- ArduinoJson @ 6.20.0
+|-- PubSubClient @ 2.8.0
+|-- ESP Async WebServer @ 1.2.3+sha.f71e3d4
+|   |-- AsyncTCP @ 1.1.1
+|   |-- FS @ 2.0.0
+|   |-- WiFi @ 2.0.0
+|-- FS @ 2.0.0
+|-- LittleFS @ 2.0.0
+|   |-- FS @ 2.0.0
+|-- Wire @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|   |-- WiFi @ 2.0.0
+|-- WiFi @ 2.0.0
+
+RAM:   [==        ]  16.2% (used 53008 bytes from 327680 bytes)
+Flash: [========  ]  77.2% (used 1012353 bytes from 1310720 bytes)
+*/
+
 #include <Arduino.h>
 #include "MyConfig.h"
 #include "MyFileManage.h"
