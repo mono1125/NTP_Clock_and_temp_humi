@@ -76,14 +76,8 @@ void mqttTask(void* pvParameters) {
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
-      } else if (strcmp(mqtt_data.topic, DEVICE_CPU_TEMP_PUB_TOPIC) == 0) {
-        if (!mqttClient.publish(DEVICE_CPU_TEMP_PUB_TOPIC, mqtt_data.data)) {
-          retry_count++;
-          ESP_LOGE(TAG, "publish error");
-        }
-        ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
-      } else if (strcmp(mqtt_data.topic, DEVICE_FREE_HEAP_PUB_TOPIC) == 0) {
-        if (!mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data)) {
+      } else if (strcmp(mqtt_data.topic, DEVICE_HEALTH_PUB_TOPIC) == 0) {
+        if (!mqttClient.publish(DEVICE_HEALTH_PUB_TOPIC, mqtt_data.data)) {
           retry_count++;
           ESP_LOGE(TAG, "publish error");
         }

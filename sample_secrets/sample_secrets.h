@@ -11,20 +11,20 @@
 #define CONF_AP_SUBNET "255.255.255.0"
 
 /* Web Server */
-#define HTTP_PORT 80
+#define HTTP_PORT (80)
 #define HTTP_USER "admin"
 #define HTTP_PASS "passw0rd"
 
 /* MQTT */
 #define THING_NAME    "Your Thing (IoT Core)"
 #define MQTT_ENDPOINT "xxxxxxxxxxxxxx.iot.ap-northeast-1.amazonaws.com"
-#define MQTT_PORT     8883
+#define MQTT_PORT     (8883)
 
 /* MQTT Topic */
 extern const char TEST_PUB_TOPIC[];
 extern const char PROD_PUB_TOPIC[];
-extern const char DEVICE_CPU_TEMP_PUB_TOPIC[];
-extern const char DEVICE_FREE_HEAP_PUB_TOPIC[];
+extern const char DEVICE_INFO_PUB_TOPIC[];
+extern const char DEVICE_HEALTH_PUB_TOPIC[];
 extern const char DEVICE_RESPONSE_PUB_TOPIC[];
 extern const char CONF_SUB_TOPIC[];
 

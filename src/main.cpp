@@ -189,38 +189,21 @@ void setup() {
   }
 }
 
-static void pubHeapSize() {
+static void pubDeviceHealth() {
   static MQTTData pub_heap;
   struct tm       _timeInfo;
   time_t          now;
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  unsigned long long unixTime = time(&now);
-  strncpy(pub_heap.topic, DEVICE_FREE_HEAP_PUB_TOPIC, sizeof(pub_heap.topic) - 1);
-  sprintf(
-      pub_heap.data,
-      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
-      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
-      (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
+  unsigned long unixTime = time(&now);
+  strncpy(pub_heap.topic, DEVICE_HEALTH_PUB_TOPIC, sizeof(pub_heap.topic) - 1);
+  sprintf(pub_heap.data,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": "
+          "\"%lu\",\"cpu_temp\":%.2f,\"heap_free\": %lu,\"rssi\":%d}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime, temperatureRead(), esp_get_free_heap_size(), WiFi.RSSI());
   xQueueSend(pubQueue, &pub_heap, 0);
-}
-
-static void pubCpuTemp() {
-  static MQTTData pub_cpu_temp;
-  struct tm       _timeInfo;
-  time_t          now;
-  if (!getLocalTime(&_timeInfo, 5000)) {
-    return;
-  }
-  unsigned long long unixTime = time(&now);
-  strncpy(pub_cpu_temp.topic, DEVICE_CPU_TEMP_PUB_TOPIC, sizeof(pub_cpu_temp.topic) - 1);
-  sprintf(
-      pub_cpu_temp.data,
-      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
-      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
-      (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
-  xQueueSend(pubQueue, &pub_cpu_temp, 0);
 }
 
 static void pubHumiAndTemp(float h, float t) {
@@ -230,49 +213,33 @@ static void pubHumiAndTemp(float h, float t) {
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  unsigned long long unixTime = time(&now);
+  unsigned long unixTime = time(&now);
   if (config.pubProd == 0) {
     strncpy(pub_humi_and_temp.topic, TEST_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
   } else {
     strncpy(pub_humi_and_temp.topic, PROD_PUB_TOPIC, sizeof(pub_humi_and_temp.topic) - 1);
   }
   sprintf(pub_humi_and_temp.data,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
-          "\"temp\":%.2f}}",
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"humi\":%.2f, "
+          "\"temp\":%.2f}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, h, t);
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime, h, t);
   xQueueSend(pubQueue, &pub_humi_and_temp, 0);
 }
 
-static void tcpHeapSize() {
+static void tcpDeviceHealth() {
   static char buf[TCP_MSG_SIZE];
   struct tm   _timeInfo;
   time_t      now;
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  unsigned long long unixTime = time(&now);
-  sprintf(
-      buf,
-      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"heap_free\": %lu}}",
-      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
-      (_timeInfo.tm_sec), unixTime * 1000, esp_get_free_heap_size());
-  xQueueSend(tcpQueue, buf, 0);
-}
-
-static void tcpCpuTemp() {
-  static char buf[TCP_MSG_SIZE];
-  struct tm   _timeInfo;
-  time_t      now;
-  if (!getLocalTime(&_timeInfo, 5000)) {
-    return;
-  }
-  unsigned long long unixTime = time(&now);
-  sprintf(
-      buf,
-      "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"cpu_temp\": %.2f}}",
-      (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour), (_timeInfo.tm_min),
-      (_timeInfo.tm_sec), unixTime * 1000, temperatureRead());
+  unsigned long unixTime = time(&now);
+  sprintf(buf,
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": "
+          "\"%lu\",\"cpu_temp\":%.2f,\"heap_free\": %lu,\"rssi\":%d}",
+          (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime, temperatureRead(), esp_get_free_heap_size(), WiFi.RSSI());
   xQueueSend(tcpQueue, buf, 0);
 }
 
@@ -283,12 +250,13 @@ static void tcpHumiAndTemp(float h, float t) {
   if (!getLocalTime(&_timeInfo, 5000)) {
     return;
   }
-  unsigned long long unixTime = time(&now);
+  unsigned long unixTime = time(&now);
   sprintf(buf,
-          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d.000\",\"time_serial\": \"%llu\",\"val\": {\"humi\":%.2f, "
-          "\"temp\":%.2f}}",
+          "{\"time_stamp\": \"%04d-%02d-%02d %02d:%02d:%02d\",\"time_serial\": \"%lu\",\"humi\":%.2f, "
+          "\"temp\":%.2f}",
           (_timeInfo.tm_year + 1900), (_timeInfo.tm_mon + 1), (_timeInfo.tm_mday), (_timeInfo.tm_hour),
-          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime * 1000, h, t);
+          (_timeInfo.tm_min), (_timeInfo.tm_sec), unixTime, h, t);
+
   xQueueSend(tcpQueue, buf, 0);
 }
 
@@ -296,18 +264,16 @@ void loop() {
   ESP_LOGI("loop", "free heap size: %d", esp_get_free_heap_size());
   switch (getSendMode(&config)) {
     case TCP_ONLY:
-      tcpHeapSize();
-      tcpCpuTemp();
+      tcpDeviceHealth();
       tcpHumiAndTemp(humi, temp);
       break;
     case MQTT_ONLY:
-      pubHeapSize();
-      pubCpuTemp();
+      pubDeviceHealth();
       pubHumiAndTemp(humi, temp);
       break;
     case TCP_AND_MQTT:
-      pubHeapSize();
-      pubCpuTemp();
+      pubDeviceHealth();
+      tcpDeviceHealth();
       pubHumiAndTemp(humi, temp);
       tcpHumiAndTemp(humi, temp);
       break;
