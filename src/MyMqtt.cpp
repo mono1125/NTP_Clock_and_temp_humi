@@ -40,33 +40,57 @@ void initMqtt(const Config* p) {
 
 void mqttTask(void* pvParameters) {
   static MQTTData mqtt_data;
+  int             retry_count = 0;
+  int             max_retry   = 5;
   while (1) {
     if (!mqttClient.loop()) {
-      mqttClient.connect(THING_NAME);
+      connectMqtt();
+      mqttClient.loop();
     }
+
+    /* Publish Retry */
+    if (retry_count > 0) {
+      if (mqttClient.publish(mqtt_data.topic, mqtt_data.data)) {
+        retry_count = 0;
+        continue;
+      } else {
+        retry_count++;
+        delay(1500);
+      }
+      if (retry_count > max_retry) {
+        retry_count = 0;
+      }
+      continue;
+    }
+
     if (xQueueReceive(pubQueue, &mqtt_data, 0) == pdPASS) {
       if (strcmp(mqtt_data.topic, TEST_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(TEST_PUB_TOPIC, mqtt_data.data)) {
+          retry_count++;
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, PROD_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(PROD_PUB_TOPIC, mqtt_data.data)) {
+          retry_count++;
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_CPU_TEMP_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(DEVICE_CPU_TEMP_PUB_TOPIC, mqtt_data.data)) {
+          retry_count++;
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_FREE_HEAP_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(DEVICE_FREE_HEAP_PUB_TOPIC, mqtt_data.data)) {
+          retry_count++;
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
       } else if (strcmp(mqtt_data.topic, DEVICE_RESPONSE_PUB_TOPIC) == 0) {
         if (!mqttClient.publish(DEVICE_RESPONSE_PUB_TOPIC, mqtt_data.data)) {
+          retry_count++;
           ESP_LOGE(TAG, "publish error");
         }
         ESP_LOGI(TAG, "(publish) Topic: %s, Data: %s", mqtt_data.topic, mqtt_data.data);
@@ -200,8 +224,8 @@ static void connectMqtt() {
     } else {
       ESP_LOGE(TAG, "MQTT Connect Failed");
       pubSubErr(mqttClient.state());
-      ESP_LOGI(TAG, "try again in 5 seconds");
-      delay(5000);
+      ESP_LOGI(TAG, "try again in 1 seconds");
+      delay(1000);
     }
   }
 }
