@@ -98,8 +98,8 @@ void IRAM_ATTR onTimer2() {
 /* Interrupt */
 
 /* Task Prototype */
-void Task0a(void *pvParams);
-void Task1a(void *pvParams);
+void sensorTask(void *pvParams);
+void ledTask(void *pvParams);
 /* Task Prototype */
 
 static float humi = 0;
@@ -120,8 +120,8 @@ static void runMode(Config *config) {
   xTaskCreatePinnedToCore(WiFiKeepAliveTask, "WiFi KeepAliveTask", 4096, NULL, 1, NULL, 0);
   initLedDisplay();
   myI2Cbegin();
-  xTaskCreatePinnedToCore(Task0a, "Task0a", 4096, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(Task1a, "Task1a", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(sensorTask, "Task0a", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(ledTask, "Task1a", 4096, NULL, 1, NULL, 1);
 
   switch (getSendMode(config)) {
     case TCP_ONLY:
@@ -283,7 +283,7 @@ void loop() {
   delay(15000);
 }
 
-void Task0a(void *pvParams) {
+void sensorTask(void *pvParams) {
   timer1 = timerBegin(0, getApbFrequency() / 1000000, true);  // 1us
   timerAttachInterrupt(timer1, &onTimer1, true);
   timerAlarmWrite(timer1, 10000000, true);
@@ -302,7 +302,7 @@ void Task0a(void *pvParams) {
   vTaskDelete(NULL);
 }
 
-void Task1a(void *pvParams) {
+void ledTask(void *pvParams) {
   timer2 = timerBegin(1, getApbFrequency() / 1000000, true);  // 1us
   timerAttachInterrupt(timer2, &onTimer2, true);
   timerAlarmWrite(timer2, 600, true);
