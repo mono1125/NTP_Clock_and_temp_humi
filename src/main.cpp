@@ -76,24 +76,17 @@ Flash: [========  ]  77.2% (used 1012353 bytes from 1310720 bytes)
 static char TAG[] = "main";
 
 /* Interrupt */
-volatile int timeCounter1;
-volatile int timeCounter2;
-hw_timer_t  *timer1   = NULL;  // measurement
-hw_timer_t  *timer2   = NULL;  // display
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+hw_timer_t                *meas_timer            = NULL;  // measurement
+hw_timer_t                *led_timer             = NULL;  // display
+volatile SemaphoreHandle_t meas_semaphore_handle = NULL;
+volatile SemaphoreHandle_t led_semaphore_handle  = NULL;
 
-void IRAM_ATTR onTimer1() {
-  // ISR
-  portENTER_CRITICAL_ISR(&timerMux);
-  timeCounter1++;
-  portEXIT_CRITICAL_ISR(&timerMux);
+void IRAM_ATTR onMeasTimer() {
+  xSemaphoreGiveFromISR(meas_semaphore_handle, NULL);
 }
 
-void IRAM_ATTR onTimer2() {
-  // ISR
-  portENTER_CRITICAL_ISR(&timerMux);
-  timeCounter2++;
-  portEXIT_CRITICAL_ISR(&timerMux);
+void IRAM_ATTR onLedTimer() {
+  xSemaphoreGiveFromISR(led_semaphore_handle, NULL);
 }
 /* Interrupt */
 
@@ -284,15 +277,13 @@ void loop() {
 }
 
 void sensorTask(void *pvParams) {
-  timer1 = timerBegin(0, getApbFrequency() / 1000000, true);  // 1us
-  timerAttachInterrupt(timer1, &onTimer1, true);
-  timerAlarmWrite(timer1, 10000000, true);
-  timerAlarmEnable(timer1);
+  meas_semaphore_handle = xSemaphoreCreateBinary();
+  meas_timer            = timerBegin(0, getApbFrequency() / 1000000, true);  // 1us
+  timerAttachInterrupt(meas_timer, &onMeasTimer, true);
+  timerAlarmWrite(meas_timer, 10000000, true);
+  timerAlarmEnable(meas_timer);
   while (true) {
-    if (timeCounter1 > 0) {
-      portENTER_CRITICAL(&timerMux);
-      timeCounter1--;
-      portEXIT_CRITICAL(&timerMux);
+    if (xSemaphoreTake(meas_semaphore_handle, 0) == pdTRUE) {
       if (myI2CGetData(&humi, &temp)) {
         ESP_LOGI("SENSOR", "Temp: %f, Humi: %f", temp, humi);
       }
@@ -303,16 +294,13 @@ void sensorTask(void *pvParams) {
 }
 
 void ledTask(void *pvParams) {
-  timer2 = timerBegin(1, getApbFrequency() / 1000000, true);  // 1us
-  timerAttachInterrupt(timer2, &onTimer2, true);
-  timerAlarmWrite(timer2, 600, true);
-  timerAlarmEnable(timer2);
+  led_semaphore_handle = xSemaphoreCreateBinary();
+  led_timer            = timerBegin(1, getApbFrequency() / 1000000, true);  // 1us
+  timerAttachInterrupt(led_timer, &onLedTimer, true);
+  timerAlarmWrite(led_timer, 600, true);
+  timerAlarmEnable(led_timer);
   while (true) {
-    if (timeCounter2 > 0) {
-      portENTER_CRITICAL(&timerMux);
-      timeCounter2--;
-      portEXIT_CRITICAL(&timerMux);
-
+    if (xSemaphoreTake(led_semaphore_handle, 0) == pdTRUE) {
       getLocalTime(&timeInfo);
       displayTime(&timeInfo, &humi, &temp);
     }
